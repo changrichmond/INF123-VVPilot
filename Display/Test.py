@@ -10,9 +10,11 @@ pygame.init()
 pygame.key.set_repeat(50,50)
 
 RED = (255,0,0)
+BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
 SPEED = 0.5
+BULLET_SPEED = 10
 ANGULAR_VELOCITY = 5
 VELOCITY_CAP = 5
 direction = 0
@@ -23,6 +25,8 @@ velocity = (0, 0)
 dimensions = (30, 30)
 
 clock = pygame.time.Clock()
+
+bulletList = []
 
 # pygame.draw.polygon(display, RED, [(x-dimx, y+dimy), (x+dimx, y+dimy), (x, y-dimy)], 1)
 # pygame.display.update()
@@ -49,6 +53,9 @@ while True:
                 direction -= ANGULAR_VELOCITY
             if key == K_d or key == K_RIGHT:
                 direction += ANGULAR_VELOCITY
+            if key == K_SPACE:
+                bullet = (x, y, direction)
+                bulletList.append(bullet)
     
     location = (x+velx, y+vely)
     sinD = math.sin(math.radians(direction))
@@ -60,5 +67,15 @@ while True:
     x3 = dimy*sinD
     y3 = -dimy*cosD
     pygame.draw.polygon(display, RED, [(x+x1, y+y1), (x+x2, y+y2), (x+x3, y+y3)], 1)
+    
+    i = 0
+    while i < len(bulletList):
+        
+        bx, by, bdir = bulletList[i]
+        bsinD = math.sin(math.radians(bdir))
+        bcosD = math.cos(math.radians(bdir))
+        bulletList[i] = (bx + BULLET_SPEED*bsinD, by - BULLET_SPEED*bcosD, bdir)
+        pygame.draw.circle(display, BLUE, (int(bx), int(by)), 3)
+        i = i+1
     
     pygame.display.update()
