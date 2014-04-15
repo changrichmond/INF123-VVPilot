@@ -15,14 +15,17 @@ WHITE = (255, 255, 255)
 
 SPEED = 0.5
 BULLET_SPEED = 10
+BULLET_DURATION = 60
 ANGULAR_VELOCITY = 4
 VELOCITY_CAP = 5
-direction = 0
+SHOOT_DELAY = 10
 
 display = pygame.display.set_mode((1024,768))
 location = (320, 240)
 velocity = (0, 0)
 dimensions = (30, 30)
+direction = 0
+delay = 0
 
 clock = pygame.time.Clock()
 
@@ -32,6 +35,8 @@ bulletList = []
 # pygame.display.update()
 while True:
     clock.tick(60)
+    if delay>0:
+        delay = delay-1
     x, y = location
     velx, vely = velocity
     dimx, dimy = dimensions
@@ -52,9 +57,10 @@ while True:
             direction -= ANGULAR_VELOCITY
         if keys[K_d] or keys[K_RIGHT]:
             direction += ANGULAR_VELOCITY
-        if keys[K_SPACE]:
-            bullet = (x, y, direction)
+        if keys[K_SPACE] and delay<=0:
+            bullet = (x + dimy*sinD, y-dimy*cosD, direction, BULLET_DURATION)
             bulletList.append(bullet)
+            delay = SHOOT_DELAY
     
     location = (x+velx, y+vely)
     sinD = math.sin(math.radians(direction))
@@ -70,11 +76,15 @@ while True:
     i = 0
     while i < len(bulletList):
         
-        bx, by, bdir = bulletList[i]
+        bx, by, bdir, bdur = bulletList[i]
         bsinD = math.sin(math.radians(bdir))
         bcosD = math.cos(math.radians(bdir))
-        bulletList[i] = (bx + BULLET_SPEED*bsinD, by - BULLET_SPEED*bcosD, bdir)
+        bdur = bdur - 1
+        bulletList[i] = (bx + BULLET_SPEED*bsinD, by - BULLET_SPEED*bcosD, bdir, bdur)
         pygame.draw.circle(display, BLUE, (int(bx), int(by)), 3)
-        i = i+1
+        if bdur <= 0:
+            bulletList.remove(bulletList[i])
+        else:
+            i = i+1
     
     pygame.display.update()
