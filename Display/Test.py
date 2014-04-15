@@ -15,7 +15,7 @@ WHITE = (255, 255, 255)
 
 SPEED = 0.5
 BULLET_SPEED = 10
-ANGULAR_VELOCITY = 5
+ANGULAR_VELOCITY = 4
 VELOCITY_CAP = 5
 direction = 0
 
@@ -31,7 +31,7 @@ bulletList = []
 # pygame.draw.polygon(display, RED, [(x-dimx, y+dimy), (x+dimx, y+dimy), (x, y-dimy)], 1)
 # pygame.display.update()
 while True:
-    clock.tick(30)
+    clock.tick(60)
     x, y = location
     velx, vely = velocity
     dimx, dimy = dimensions
@@ -41,21 +41,20 @@ while True:
             exit()
         sinD = math.sin(math.radians(direction))
         cosD = math.cos(math.radians(direction))
-        if event.type == KEYDOWN:
-            key = event.key
-            if key == K_w or key == K_UP:
-                velocity = (velx + SPEED*sinD, vely - SPEED*cosD)
-                velx, vely = velocity
-                mag = math.sqrt(velx*velx + vely*vely)
-                if mag>VELOCITY_CAP:
-                    velocity = (velx/mag*VELOCITY_CAP, vely/mag*VELOCITY_CAP)
-            if key == K_a or key == K_LEFT:
-                direction -= ANGULAR_VELOCITY
-            if key == K_d or key == K_RIGHT:
-                direction += ANGULAR_VELOCITY
-            if key == K_SPACE:
-                bullet = (x, y, direction)
-                bulletList.append(bullet)
+        keys = pygame.key.get_pressed()
+        if keys[K_w] or keys[K_UP]:
+            velocity = (velx + SPEED*sinD, vely - SPEED*cosD)
+            velx, vely = velocity
+            mag = math.sqrt(velx*velx + vely*vely)
+            if mag>VELOCITY_CAP:
+                velocity = (velx/mag*VELOCITY_CAP, vely/mag*VELOCITY_CAP)
+        if keys[K_a] or keys[K_LEFT]:
+            direction -= ANGULAR_VELOCITY
+        if keys[K_d] or keys[K_RIGHT]:
+            direction += ANGULAR_VELOCITY
+        if keys[K_SPACE]:
+            bullet = (x, y, direction)
+            bulletList.append(bullet)
     
     location = (x+velx, y+vely)
     sinD = math.sin(math.radians(direction))
