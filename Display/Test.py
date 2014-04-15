@@ -47,29 +47,30 @@ while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             exit()
-        sinD = math.sin(math.radians(direction))
-        cosD = math.cos(math.radians(direction))
-        keys = pygame.key.get_pressed()
-        if keys[K_w] or keys[K_UP]:
-            velocity = (velx + SPEED*sinD, vely - SPEED*cosD)
-            velx, vely = velocity
-            mag = math.sqrt(velx*velx + vely*vely)
-            if mag>VELOCITY_CAP:
-                velocity = (velx/mag*VELOCITY_CAP, vely/mag*VELOCITY_CAP)
-            moved = True
-        if keys[K_a] or keys[K_LEFT]:
-            direction -= ANGULAR_VELOCITY
-        if keys[K_d] or keys[K_RIGHT]:
-            direction += ANGULAR_VELOCITY
-        if keys[K_SPACE] and delay<=0:
-            bullet = (x + dimy*sinD, y-dimy*cosD, direction, BULLET_DURATION)
-            bulletList.append(bullet)
-            delay = SHOOT_DELAY
-            velocity = (velx - SPEED*sinD, vely + SPEED*cosD)
-            velx, vely = velocity
-            mag = math.sqrt(velx*velx + vely*vely)
-            if mag>VELOCITY_CAP:
-                velocity = (velx/mag*VELOCITY_CAP, vely/mag*VELOCITY_CAP)
+            
+    sinD = math.sin(math.radians(direction))
+    cosD = math.cos(math.radians(direction))
+    keys = pygame.key.get_pressed()
+    if keys[K_w] or keys[K_UP]:
+        velocity = (velx + SPEED*sinD, vely - SPEED*cosD)
+        velx, vely = velocity
+        mag = math.sqrt(velx*velx + vely*vely)
+        if mag>VELOCITY_CAP:
+            velocity = (velx/mag*VELOCITY_CAP, vely/mag*VELOCITY_CAP)
+        moved = True
+    if keys[K_a] or keys[K_LEFT]:
+        direction -= ANGULAR_VELOCITY
+    if keys[K_d] or keys[K_RIGHT]:
+        direction += ANGULAR_VELOCITY
+    if keys[K_SPACE] and delay<=0:
+        bullet = (x + dimy*sinD, y-dimy*cosD, direction, BULLET_DURATION)
+        bulletList.append(bullet)
+        delay = SHOOT_DELAY
+        velocity = (velx - SPEED*sinD, vely + SPEED*cosD)
+        velx, vely = velocity
+        mag = math.sqrt(velx*velx + vely*vely)
+        if mag>VELOCITY_CAP:
+            velocity = (velx/mag*VELOCITY_CAP, vely/mag*VELOCITY_CAP)
     
     location = (x+velx, y+vely)
     sinD = math.sin(math.radians(direction))
