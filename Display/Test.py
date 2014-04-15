@@ -31,13 +31,13 @@ while True:
         if event.type == KEYDOWN:
             key = event.key
             if key == K_w or key == K_UP:
-                location = (x, y - 1)
+                location = (x, y - 5)
             if key == K_a or key == K_LEFT:
-                location = (x - 1, y)
+                location = (x - 5, y)
             if key == K_s or key == K_DOWN:
-                location = (x, y + 1)
+                location = (x, y + 5)
             if key == K_d or key == K_RIGHT:
-                location = (x + 1, y)
+                location = (x + 5, y)
     
     pygame.draw.polygon(display, RED, [(x-dimx, y+dimy), (x+dimx, y+dimy), (x, y-dimy)], 1)
     
