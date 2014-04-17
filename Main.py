@@ -5,6 +5,7 @@ Created on Apr 2, 2014
 '''
 import pygame, math, random
 from pygame.locals import *
+import Display
 
 pygame.init()
 pygame.key.set_repeat(15,15)
@@ -114,21 +115,18 @@ while True:
     camy = camy - camh/2
     sinD = math.sin(math.radians(direction))
     cosD = math.cos(math.radians(direction))
-    x1 = -dimx*cosD - dimy*sinD
-    y1 = -dimx*sinD + dimy*cosD
-    x2 = dimx*cosD - dimy*sinD
-    y2 = dimx*sinD + dimy*cosD
-    x3 = dimy*sinD
-    y3 = -dimy*cosD
-    pygame.draw.polygon(display, BLACK, [(x-camx+x1, y-camy+y1), (x-camx+x2, y-camy+y2), (x-camx+x3, y-camy+y3)], 2)
-    if moved:
+    cameraDict = {'location':camera, 'bounds':camera_bounds}
+    Display.draw_triangle(display, BLACK, location, dimensions, direction, 2, cameraDict)
+    #pygame.draw.polygon(display, BLACK, [(x-camx+x1, y-camy+y1), (x-camx+x2, y-camy+y2), (x-camx+x3, y-camy+y3)], 2)
+    if True:
         x1 = -dimx/2*cosD - dimy*sinD
         y1 = -dimx/2*sinD + dimy*cosD
         x2 = dimx/2*cosD - dimy*sinD
         y2 = dimx/2*sinD + dimy*cosD
         x3 = -dimy*2*sinD
         y3 = dimy*2*cosD
-        pygame.draw.polygon(display, RED, [(x-camx+x1, y-camy+y1), (x-camx+x2, y-camy+y2), (x-camx+x3, y-camy+y3)], 2)
+        Display.draw_triangle_offset(display, RED, (location[0], location[1]+dimensions[1]), location, (dimensions[0]/2, dimensions[1]/2), direction, 2, cameraDict)
+        #pygame.draw.polygon(display, RED, [(x-camx+x1, y-camy+y1), (x-camx+x2, y-camy+y2), (x-camx+x3, y-camy+y3)], 2)
     
     i = 0
     while i < len(bulletList):
@@ -143,9 +141,7 @@ while True:
             bulletList.remove(bulletList[i])
         else:
             i = i+1
-            
     for n in wall_list:
-        drawRect = pygame.Rect(n.x-camx, n.y-camy, n.w, n.h)
-        pygame.draw.rect(display, GREEN, drawRect, 2)
+        Display.draw_rect(display, GREEN, n, 2, cameraDict)
     
     pygame.display.update()
