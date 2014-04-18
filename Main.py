@@ -68,7 +68,7 @@ def bullet_death(bullet, bullet_rect, obstacle_rect):
         b_scatter = random.randint(0, scatter)
         b_speed = random.random()*bd_speed
         direction = bullet[2] + 180 + b_scatter - scatter/2 
-        dvel = (math.sin(math.radians(direction))*b_speed, math.cos(math.radians(direction))*b_speed)
+        dvel = (math.sin(math.radians(direction))*b_speed, -math.cos(math.radians(direction))*b_speed)
         debris.append(((bullet[0], bullet[1]), dvel, bd_timer, 0, BULLET_SIZE/2, 0, bd_timer, BLUE))
         
 
