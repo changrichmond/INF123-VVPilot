@@ -80,26 +80,26 @@ while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             exit()
-            
-    sinD = math.sin(math.radians(player_ship.direction))
-    cosD = math.cos(math.radians(player_ship.direction))
-    keys = pygame.key.get_pressed()
-    if keys[K_w] or keys[K_UP]:
-        player_ship.move()
-        moved = True
-    if keys[K_a] or keys[K_LEFT]:
-        player_ship.turn_left()
-    if keys[K_d] or keys[K_RIGHT]:
-        player_ship.turn_right()
-    if keys[K_SPACE] and player_ship.delay<=0:
-        bullet = (x + dimy*sinD, y-dimy*cosD, player_ship.direction, BULLET_DURATION)
-        bulletList.append(bullet)
-        player_ship.delay = SHOOT_DELAY
-        velocity = (velx - SPEED*sinD, vely + SPEED*cosD)
-        velx, vely = velocity
-        mag = math.sqrt(velx*velx + vely*vely)
-        if mag>VELOCITY_CAP:
-            velocity = (velx/mag*VELOCITY_CAP, vely/mag*VELOCITY_CAP)
+    if death_timer<=0:
+        sinD = math.sin(math.radians(player_ship.direction))
+        cosD = math.cos(math.radians(player_ship.direction))
+        keys = pygame.key.get_pressed()
+        if keys[K_w] or keys[K_UP]:
+            player_ship.move()
+            moved = True
+        if keys[K_a] or keys[K_LEFT]:
+            player_ship.turn_left()
+        if keys[K_d] or keys[K_RIGHT]:
+            player_ship.turn_right()
+        if keys[K_SPACE] and player_ship.delay<=0:
+            bullet = (x + dimy*sinD, y-dimy*cosD, player_ship.direction, BULLET_DURATION)
+            bulletList.append(bullet)
+            player_ship.delay = SHOOT_DELAY
+            velocity = (velx - SPEED*sinD, vely + SPEED*cosD)
+            velx, vely = velocity
+            mag = math.sqrt(velx*velx + vely*vely)
+            if mag>VELOCITY_CAP:
+                velocity = (velx/mag*VELOCITY_CAP, vely/mag*VELOCITY_CAP)
     
     player_ship.update()
     
