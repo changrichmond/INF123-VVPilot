@@ -161,7 +161,7 @@ while True:
         rect = pygame.Rect(bx-BULLET_SIZE, by-BULLET_SIZE, BULLET_SIZE*2, BULLET_SIZE*2)
         for n in wall_list:
             if n.colliderect(rect):
-                bulletList[i] = (bx, by, bdir, 0)
+                bulletList[i] = (bx - BULLET_SPEED*bsinD, by + BULLET_SPEED*bcosD, bdir, 0)
                 bullet_death(bulletList[i], rect, n)
         if bulletList[i][3]>0:
             Display.draw_circle(display, camera, BLUE, (bx, by), BULLET_SIZE)
