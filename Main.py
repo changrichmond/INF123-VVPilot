@@ -26,6 +26,8 @@ SHOOT_DELAY = 10
 map_dimensions = (3200, 1800)
 camera_bounds = (854, 480)
 
+camera = {'location':(320, 240), 'bounds':camera_bounds}
+
 display = pygame.display.set_mode(camera_bounds)
 location = (320, 240)
 velocity = (0, 0)
@@ -33,8 +35,6 @@ dimensions = (15, 15)
 ship_rect = pygame.Rect(location[0] - dimensions[0]/2, location[1]-dimensions[1]/2, dimensions[0], dimensions[1])
 direction = 0
 delay = 0
-
-camera = (320, 240)
 
 clock = pygame.time.Clock()
 
@@ -96,37 +96,14 @@ while True:
         if ship_rect.colliderect(n):
             print "colliding"
     
-    camera = (x, y)
-    camx, camy = camera
-    camw = display.get_width()
-    camh = display.get_height()
-    
-    if camx - camw/2 < 0:
-        camera = (camw/2, camy)
-    elif camx + camw/2 > map_dimensions[0]:
-        camera = (map_dimensions[0] - camw/2, camy)
-    if camy - camh/2 < 0:
-        camera = (camera[0], camh/2)
-    elif camy + camh/2 > map_dimensions[1]:
-        camera = (camera[0], map_dimensions[1] - camh/2)
+    Display.set_camera_loc(camera, (x, y))
+    Display.bound_camera(camera, map_dimensions)
         
-    camx, camy = camera
-    camx = camx - camw/2
-    camy = camy - camh/2
     sinD = math.sin(math.radians(direction))
     cosD = math.cos(math.radians(direction))
-    cameraDict = {'location':camera, 'bounds':camera_bounds}
-    Display.draw_triangle(display, BLACK, location, dimensions, direction, 2, cameraDict)
-    #pygame.draw.polygon(display, BLACK, [(x-camx+x1, y-camy+y1), (x-camx+x2, y-camy+y2), (x-camx+x3, y-camy+y3)], 2)
-    if True:
-        x1 = -dimx/2*cosD - dimy*sinD
-        y1 = -dimx/2*sinD + dimy*cosD
-        x2 = dimx/2*cosD - dimy*sinD
-        y2 = dimx/2*sinD + dimy*cosD
-        x3 = -dimy*2*sinD
-        y3 = dimy*2*cosD
-        Display.draw_triangle_offset(display, RED, (location[0], location[1]+dimensions[1]), location, (dimensions[0]/2, dimensions[1]/2), direction, 2, cameraDict)
-        #pygame.draw.polygon(display, RED, [(x-camx+x1, y-camy+y1), (x-camx+x2, y-camy+y2), (x-camx+x3, y-camy+y3)], 2)
+    Display.draw_triangle(display, camera, BLACK, location, dimensions, direction, 2)
+    if moved:
+        Display.draw_triangle_offset(display, camera, RED, (location[0], location[1]+dimensions[1]*3/2), (dimensions[0]/2, dimensions[1]/2), direction-180, location, 2)
     
     i = 0
     while i < len(bulletList):
@@ -136,12 +113,12 @@ while True:
         bcosD = math.cos(math.radians(bdir))
         bdur = bdur - 1
         bulletList[i] = (bx + BULLET_SPEED*bsinD, by - BULLET_SPEED*bcosD, bdir, bdur)
-        pygame.draw.circle(display, BLUE, (int(bx-camx), int(by-camy)), BULLET_SIZE)
+        Display.draw_circle(display, camera, BLUE, (bx, by), BULLET_SIZE)
         if bdur <= 0:
             bulletList.remove(bulletList[i])
         else:
             i = i+1
     for n in wall_list:
-        Display.draw_rect(display, GREEN, n, 2, cameraDict)
+        Display.draw_rect(display, camera, GREEN, n, 2)
     
     pygame.display.update()
