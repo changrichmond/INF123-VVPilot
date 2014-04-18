@@ -17,11 +17,11 @@ GREEN = (0, 255, 0)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-SPEED = 0.1
+SPEED = 0.075
 BULLET_SPEED = 10
 BULLET_DURATION = 60
 BULLET_SIZE = 5
-ANGULAR_VELOCITY = 2
+ANGULAR_VELOCITY = 4
 VELOCITY_CAP = 5
 SHOOT_DELAY = 10
 map_dimensions = (3200, 1800)
@@ -34,6 +34,13 @@ display = pygame.display.set_mode(camera_bounds)
 player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY)
 DEATH_TIME = 120
 death_timer = 0
+death_projectile_count = 10
+death_projectile_timer = 30
+death_projectile_speed = 10
+bullet_debris_timer = 15
+bullet_debris_scatter = 90
+min_bullet_debris = 2
+max_bullet_debris = 5
 
 clock = pygame.time.Clock()
 
@@ -45,31 +52,27 @@ debris = []
 
 def death_function(ship):
     ship.velocity = (0, 0)
+    ship.direction = 0
     global death_timer
     death_timer = DEATH_TIME
-    r = 10
-    dspeed = 10
-    dtimer = 30
-    angles = 360/r
-    for i in range(0, r):
+    angles = 360/death_projectile_count
+    for i in range(0, death_projectile_count):
         dlocation = ship.location
-        dvelocity = (math.sin(math.radians(angles*i))*dspeed, math.cos(math.radians(angles*i))*dspeed)
+        dvelocity = (math.sin(math.radians(angles*i))*death_projectile_speed, math.cos(math.radians(angles*i))*death_projectile_speed)
         scale_factor = 0.25
         scale_base = 3
         thickness = 2
-        debris.append((dlocation, dvelocity, dtimer, scale_factor, scale_base, thickness, dtimer, BLACK))
+        debris.append((dlocation, dvelocity, death_projectile_timer, scale_factor, scale_base, thickness, death_projectile_timer, BLACK))
         
 def bullet_death(bullet, bullet_rect, obstacle_rect):
-    rand_value = random.randint(2, 5)
-    bd_timer = 15
+    rand_value = random.randint(min_bullet_debris, max_bullet_debris)
     bd_speed = BULLET_SPEED/2.0
-    scatter = 45
     for i in range(0, rand_value):
-        b_scatter = random.randint(0, scatter)
+        b_scatter = random.randint(0, bullet_debris_scatter)
         b_speed = random.random()*bd_speed
-        direction = bullet[2] + 180 + b_scatter - scatter/2 
+        direction = bullet[2] + 180 + b_scatter - bullet_debris_scatter/2 
         dvel = (math.sin(math.radians(direction))*b_speed, -math.cos(math.radians(direction))*b_speed)
-        debris.append(((bullet[0], bullet[1]), dvel, bd_timer, 0, BULLET_SIZE/2, 0, bd_timer, BLUE))
+        debris.append(((bullet[0], bullet[1]), dvel, bullet_debris_timer, 0, BULLET_SIZE/2, 0,bullet_debris_timer, BLUE))
         
 
 for i in range(0, 100):
