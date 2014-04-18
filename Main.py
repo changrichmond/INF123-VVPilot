@@ -54,7 +54,23 @@ def death_function(ship):
     for i in range(0, r):
         dlocation = ship.location
         dvelocity = (math.sin(math.radians(angles*i))*dspeed, math.cos(math.radians(angles*i))*dspeed)
-        debris.append((dlocation, dvelocity, dtimer))
+        scale_factor = 0.25
+        scale_base = 3
+        thickness = 2
+        debris.append((dlocation, dvelocity, dtimer, scale_factor, scale_base, thickness, dtimer, BLACK))
+        
+def bullet_death(bullet, bullet_rect, obstacle_rect):
+    rand_value = random.randint(2, 5)
+    bd_timer = 15
+    bd_speed = BULLET_SPEED/2.0
+    scatter = 45
+    for i in range(0, rand_value):
+        b_scatter = random.randint(0, scatter)
+        b_speed = random.random()*bd_speed
+        direction = bullet[2] + 180 + b_scatter - scatter/2 
+        dvel = (math.sin(math.radians(direction))*b_speed, math.cos(math.radians(direction))*b_speed)
+        debris.append(((bullet[0], bullet[1]), dvel, bd_timer, 0, BULLET_SIZE/2, 0, bd_timer, BLUE))
+        
 
 for i in range(0, 100):
     x = random.randint(player_ship.location[0], 3200)
@@ -125,9 +141,9 @@ while True:
         debra = debris[i]
         loc = (debra[0][0] + debra[1][0], debra[0][1] + debra[1][1])
         dur = debra[2] - 1
-        debris[i] = (loc, debra[1], dur)
+        debris[i] = (loc, debra[1], dur, debra[3], debra[4], debra[5], debra[6], debra[7])
         debra = debris[i]
-        Display.draw_circle(display, camera, BLACK, debra[0], (30-debra[2])/4 + 3, 2)
+        Display.draw_circle(display, camera, debra[7], debra[0], int((debra[6]-debra[2])*debra[3]) + debra[4], debra[5])
         if debra[2]<=0:
             debris.remove(debris[i])
         else:
@@ -146,6 +162,7 @@ while True:
         for n in wall_list:
             if n.colliderect(rect):
                 bulletList[i] = (bx, by, bdir, 0)
+                bullet_death(bulletList[i], rect, n)
         if bulletList[i][3]>0:
             Display.draw_circle(display, camera, BLUE, (bx, by), BULLET_SIZE)
         if bdur <= 0:
