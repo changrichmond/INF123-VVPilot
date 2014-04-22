@@ -36,9 +36,12 @@ DEATH_TIME = 120
 death_timer = 0
 death_projectile_count = 10
 death_projectile_timer = 30
-death_projectile_speed = 5
-bullet_debris_timer = 7
-bullet_debris_scatter = 90
+death_projectile_speed = 10
+bullet_debris_timer = 12
+bullet_debris_scatter = 180
+bullet_debris_speed_min = 1
+bullet_debris_speed_max = 3
+bullet_debris_speed_range = bullet_debris_speed_max - bullet_debris_speed_min
 min_bullet_debris = 2
 max_bullet_debris = 5
 
@@ -53,9 +56,6 @@ debris = []
 def calculate_normal(rect, point1, vector):
     #lets solve this using the parametric equation
     point2 = (point1[0] + vector[0], point1[1] + vector[1])
-    print 'starting normal calculations'
-    print point1
-    print point2
     h, k = point1
     p, q = point2
     x1 = p - h
@@ -65,25 +65,19 @@ def calculate_normal(rect, point1, vector):
     if x1 != 0:
         t_temp = math.fabs((rect.right - h)/x1)
         t = t_temp
-        print t_temp
         t_temp = math.fabs((rect.left - h)/x1)
-        print t_temp
         if t_temp < t:
             t = t_temp
             normal = (-1, 0)
     if y1 != 0:
         t_temp = math.fabs((rect.bottom - k)/y1)
-        print t_temp
         if t_temp>=0 and t_temp < t:
             t = t_temp
             normal = (0, 1)
         t_temp = math.fabs((rect.top - k)/y1)
-        print t_temp
         if t_temp>=0 and t_temp < t:
             t = t_temp
             normal = (0, -1)
-    print normal
-    print 'ending normal calculations'
     return normal
 
 def death_function(ship):
@@ -102,7 +96,6 @@ def death_function(ship):
         
 def bullet_death(bullet, bullet_rect, obstacle_rect, b_vec):
     rand_value = random.randint(min_bullet_debris, max_bullet_debris)
-    bd_speed = BULLET_SPEED/2.0
     base_direction = bullet[2]
     base_vel = (math.sin(math.radians(base_direction)), -math.cos(math.radians(base_direction)))
     walln = calculate_normal(obstacle_rect, bullet_rect.center, b_vec)
@@ -112,7 +105,7 @@ def bullet_death(bullet, bullet_rect, obstacle_rect, b_vec):
     ref_dir = math.degrees(math.atan2(reflection[1], reflection[0])) + 90
     for i in range(0, rand_value):
         b_scatter = random.randint(0, bullet_debris_scatter)
-        b_speed = random.random()*bd_speed
+        b_speed = random.random()*bullet_debris_speed_range + bullet_debris_speed_min
         direction = ref_dir + b_scatter - bullet_debris_scatter/2
         if(direction > wall_dir + 90):
             direction = wall_dir + 90
