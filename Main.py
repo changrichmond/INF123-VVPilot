@@ -30,16 +30,17 @@ camera_bounds = (854, 480)
 
 camera = {'location':(320, 240), 'bounds':camera_bounds}
 
-display = pygame.display.set_mode(camera_bounds)
-
 #we legit now son
 pygame.display.set_caption("VV Pilot")
 
 icon = pygame.Surface((32, 32))
 icon.fill(WHITE)
+pygame.gfxdraw.polygon(icon, ((3, 29), (29, 29), (16, 3)), BLACK)
+pygame.gfxdraw.polygon(icon, ((4, 28), (28, 28), (16, 3)), BLACK)
 pygame.gfxdraw.aapolygon(icon, ((2, 30), (30, 30), (15, 2)), BLACK)
-pygame.gfxdraw.aapolygon(icon, ((3, 29), (29, 29), (16, 3)), BLACK)
 pygame.display.set_icon(icon)
+
+display = pygame.display.set_mode(camera_bounds)
 
 player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY)
 DEATH_TIME = 120
