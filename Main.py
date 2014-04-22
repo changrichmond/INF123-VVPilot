@@ -34,6 +34,11 @@ display = pygame.display.set_mode(camera_bounds)
 #we legit now son
 pygame.display.set_caption("VV Pilot")
 
+icon = pygame.Surface((32, 32))
+icon.fill(WHITE)
+pygame.draw.polygon(icon, BLACK, ((2, 30), (30, 30), (15, 2)), 2)
+pygame.display.set_icon(icon)
+
 player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY)
 DEATH_TIME = 120
 death_timer = 0
