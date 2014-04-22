@@ -154,11 +154,7 @@ while True:
             bullet = (x + dimy*sinD, y-dimy*cosD, player_ship.direction, BULLET_DURATION)
             bulletList.append(bullet)
             player_ship.delay = SHOOT_DELAY
-            velocity = (velx - SPEED*sinD, vely + SPEED*cosD)
-            velx, vely = velocity
-            mag = math.sqrt(velx*velx + vely*vely)
-            if mag>VELOCITY_CAP:
-                velocity = (velx/mag*VELOCITY_CAP, vely/mag*VELOCITY_CAP)
+            player_ship.move_from_force_in_direction(player_ship.acceleration, player_ship.direction+180)
     
     player_ship.update()
     

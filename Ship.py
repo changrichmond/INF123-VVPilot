@@ -35,9 +35,15 @@ class Ship:
         self.turn(self.turn_rate)
         
     def move(self):
-        sinD = math.sin(math.radians(self.direction))
-        cosD = math.cos(math.radians(self.direction))
-        self.velocity = (self.velocity[0] + self.acceleration*sinD, self.velocity[1] - self.acceleration*cosD)
+        self.move_from_force_in_direction(self.acceleration, self.direction)
+            
+    def move_from_force(self, acceleration):
+        self.move_from_force_in_direction(acceleration, self.direction)
+            
+    def move_from_force_in_direction(self, acceleration, direction):
+        sinD = math.sin(math.radians(direction))
+        cosD = math.cos(math.radians(direction))
+        self.velocity = (self.velocity[0] + acceleration*sinD, self.velocity[1] - acceleration*cosD)
         mag = math.sqrt(math.pow(self.velocity[0], 2) + math.pow(self.velocity[1], 2))
         if mag>self.max_speed:
             self.velocity = (self.velocity[0]/mag*self.max_speed, self.velocity[1]/mag*self.max_speed)
