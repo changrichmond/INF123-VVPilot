@@ -4,6 +4,7 @@ Created on Apr 2, 2014
 @author: Cory
 '''
 import pygame, math, random
+import pygame.gfxdraw
 from pygame.locals import *
 import Display
 from Ship import Ship
@@ -36,7 +37,8 @@ pygame.display.set_caption("VV Pilot")
 
 icon = pygame.Surface((32, 32))
 icon.fill(WHITE)
-pygame.draw.polygon(icon, BLACK, ((2, 30), (30, 30), (15, 2)), 2)
+pygame.gfxdraw.aapolygon(icon, ((2, 30), (30, 30), (15, 2)), BLACK)
+pygame.gfxdraw.aapolygon(icon, ((3, 29), (29, 29), (16, 3)), BLACK)
 pygame.display.set_icon(icon)
 
 player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY)
