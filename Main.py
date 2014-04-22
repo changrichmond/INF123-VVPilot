@@ -36,8 +36,8 @@ DEATH_TIME = 120
 death_timer = 0
 death_projectile_count = 10
 death_projectile_timer = 30
-death_projectile_speed = 10
-bullet_debris_timer = 15
+death_projectile_speed = 5
+bullet_debris_timer = 7
 bullet_debris_scatter = 90
 min_bullet_debris = 2
 max_bullet_debris = 5
@@ -49,6 +49,42 @@ bulletList = []
 wall_list = []
 
 debris = []
+
+def calculate_normal(rect, point1, vector):
+    #lets solve this using the parametric equation
+    point2 = (point1[0] + vector[0], point1[1] + vector[1])
+    print 'starting normal calculations'
+    print point1
+    print point2
+    h, k = point1
+    p, q = point2
+    x1 = p - h
+    y1 = q - k
+    normal = (1, 0)
+    t = 9999999.9999 #a really large number
+    if x1 != 0:
+        t_temp = math.fabs((rect.right - h)/x1)
+        t = t_temp
+        print t_temp
+        t_temp = math.fabs((rect.left - h)/x1)
+        print t_temp
+        if t_temp < t:
+            t = t_temp
+            normal = (-1, 0)
+    if y1 != 0:
+        t_temp = math.fabs((rect.bottom - k)/y1)
+        print t_temp
+        if t_temp>=0 and t_temp < t:
+            t = t_temp
+            normal = (0, 1)
+        t_temp = math.fabs((rect.top - k)/y1)
+        print t_temp
+        if t_temp>=0 and t_temp < t:
+            t = t_temp
+            normal = (0, -1)
+    print normal
+    print 'ending normal calculations'
+    return normal
 
 def death_function(ship):
     ship.velocity = (0, 0)
@@ -64,13 +100,24 @@ def death_function(ship):
         thickness = 2
         debris.append((dlocation, dvelocity, death_projectile_timer, scale_factor, scale_base, thickness, death_projectile_timer, BLACK))
         
-def bullet_death(bullet, bullet_rect, obstacle_rect):
+def bullet_death(bullet, bullet_rect, obstacle_rect, b_vec):
     rand_value = random.randint(min_bullet_debris, max_bullet_debris)
     bd_speed = BULLET_SPEED/2.0
+    base_direction = bullet[2]
+    base_vel = (math.sin(math.radians(base_direction)), -math.cos(math.radians(base_direction)))
+    walln = calculate_normal(obstacle_rect, bullet_rect.center, b_vec)
+    wall_dir = math.degrees(math.atan2(walln[1], walln[0])) + 90
+    dot = walln[0]*base_vel[0] + walln[1]*base_vel[1]
+    reflection = (base_vel[0] - 2 * walln[0]*dot, base_vel[1] - 2*walln[1]*dot)
+    ref_dir = math.degrees(math.atan2(reflection[1], reflection[0])) + 90
     for i in range(0, rand_value):
         b_scatter = random.randint(0, bullet_debris_scatter)
         b_speed = random.random()*bd_speed
-        direction = bullet[2] + 180 + b_scatter - bullet_debris_scatter/2 
+        direction = ref_dir + b_scatter - bullet_debris_scatter/2
+        if(direction > wall_dir + 90):
+            direction = wall_dir + 90
+        if(direction < wall_dir - 90):
+            direction = wall_dir - 90
         dvel = (math.sin(math.radians(direction))*b_speed, -math.cos(math.radians(direction))*b_speed)
         debris.append(((bullet[0], bullet[1]), dvel, bullet_debris_timer, 0, BULLET_SIZE/2, 0,bullet_debris_timer, BLUE))
         
@@ -159,13 +206,22 @@ while True:
         bsinD = math.sin(math.radians(bdir))
         bcosD = math.cos(math.radians(bdir))
         bdur = bdur - 1
-        bulletList[i] = (bx + BULLET_SPEED*bsinD, by - BULLET_SPEED*bcosD, bdir, bdur)
+        bspeed = (BULLET_SPEED*bsinD, -BULLET_SPEED*bcosD)
+        bulletList[i] = (bx + bspeed[0], by + bspeed[1], bdir, bdur)
         bx, by, bdir, bdur = bulletList[i]
         rect = pygame.Rect(bx-BULLET_SIZE, by-BULLET_SIZE, BULLET_SIZE*2, BULLET_SIZE*2)
         for n in wall_list:
             if n.colliderect(rect):
-                bulletList[i] = (bx - BULLET_SPEED*bsinD, by + BULLET_SPEED*bcosD, bdir, 0)
-                bullet_death(bulletList[i], rect, n)
+                bulletList[i] = (bx - bspeed[0], by - bspeed[1], bdir, 0)
+                bullet_death(bulletList[i], rect, n, bspeed)
+                bx, by, bdir, bdur = bulletList[i]
+                rect = pygame.Rect(bx-BULLET_SIZE, by-BULLET_SIZE, BULLET_SIZE*2, BULLET_SIZE*2)
+                clip_rect = rect.clip(n)
+                if clip_rect.w < clip_rect.h:
+                    bx = bx - clip_rect.w
+                else:
+                    by = by - clip_rect.h
+                bx, by, bdir, bdur = bulletList[i]
         if bulletList[i][3]>0:
             Display.draw_circle(display, camera, BLUE, (bx, by), BULLET_SIZE)
         if bdur <= 0:
