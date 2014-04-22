@@ -31,6 +31,9 @@ camera = {'location':(320, 240), 'bounds':camera_bounds}
 
 display = pygame.display.set_mode(camera_bounds)
 
+#we legit now son
+pygame.display.set_caption("VV Pilot")
+
 player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY)
 DEATH_TIME = 120
 death_timer = 0
