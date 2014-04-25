@@ -14,7 +14,7 @@ class Ship:
         self.delay = 0
         self.velocity = velocity
         self.direction = direction
-        self.rect = pygame.Rect(location[0]-bounds[0]/2, location[1]-bounds[1]/2, bounds[0]*2, bounds[1]*2)
+        self.rect = pygame.Rect(location[0]-bounds[0], location[1]-bounds[1], bounds[0]*2, bounds[1]*2)
         self.acceleration = acceleration
         self.max_speed = max_speed
         self.turn_rate = turn_rate
