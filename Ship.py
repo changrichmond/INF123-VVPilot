@@ -6,8 +6,13 @@ Created on Apr 17, 2014
 
 import pygame, math
 
+def default_respawn(ship):
+    ship.location = (0, 0)
+    ship.velocity = (0, 0)
+    ship.direction = 0
+
 class Ship:
-    def __init__(self, location, bounds, shoot_delay, acceleration, max_speed, turn_rate, direction = 0, velocity = (0.0, 0.0)):
+    def __init__(self, location, bounds, shoot_delay, acceleration, max_speed, turn_rate, respawn_func = default_respawn, direction = 0, velocity = (0.0, 0.0)):
         self.location = location
         self.bounds = bounds
         self.shoot_delay = shoot_delay
@@ -18,12 +23,18 @@ class Ship:
         self.acceleration = acceleration
         self.max_speed = max_speed
         self.turn_rate = turn_rate
+        self.death_timer = 0
+        self.respawn_func = respawn_func
         
     def update(self):
         self.location = (self.location[0] + self.velocity[0], self.location[1] + self.velocity[1])
         self.rect.center = self.location
         if self.delay>0:
             self.delay = self.delay-1
+        if self.isDead():
+            self.death_timer -= 1
+            if not self.isDead():
+                self.respawn_func()
         
     def turn(self, turn_speed):
         self.direction += turn_speed
@@ -47,4 +58,12 @@ class Ship:
         mag = math.sqrt(math.pow(self.velocity[0], 2) + math.pow(self.velocity[1], 2))
         if mag>self.max_speed:
             self.velocity = (self.velocity[0]/mag*self.max_speed, self.velocity[1]/mag*self.max_speed)
+            
+    def kill(self, death_time):
+        self.death_timer = death_time
+        
+    def isDead(self):
+        return self.death_timer > 0
+          
+
     

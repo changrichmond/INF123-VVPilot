@@ -11,6 +11,11 @@ from Ship import Ship
 from Camera import Camera
 from Bullet import Bullet
 
+def respawn_func(ship):
+    ship.location = (320, 240)
+    ship.velocity = (0, 0)
+    ship.direction = 0
+
 pygame.init()
 pygame.key.set_repeat(15,15)
 
@@ -46,19 +51,8 @@ pygame.display.set_icon(icon)
 
 display = pygame.display.set_mode(camera_bounds)
 
-player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY)
+player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY, respawn_func)
 DEATH_TIME = 120
-death_timer = 0
-death_projectile_count = 10
-death_projectile_timer = 30
-death_projectile_speed = 10
-bullet_debris_timer = 12
-bullet_debris_scatter = 180
-bullet_debris_speed_min = 1
-bullet_debris_speed_max = 3
-bullet_debris_speed_range = bullet_debris_speed_max - bullet_debris_speed_min
-min_bullet_debris = 2
-max_bullet_debris = 5
 
 clock = pygame.time.Clock()
 
@@ -67,67 +61,6 @@ bulletList = []
 wall_list = []
 
 debris = []
-
-def calculate_normal(rect, point1, vector):
-    #lets solve this using the parametric equation
-    point2 = (point1[0] + vector[0], point1[1] + vector[1])
-    h, k = point1
-    p, q = point2
-    x1 = p - h
-    y1 = q - k
-    normal = (1, 0)
-    t = 9999999.9999 #a really large number
-    if x1 != 0:
-        t_temp = math.fabs((rect.right - h)/x1)
-        t = t_temp
-        t_temp = math.fabs((rect.left - h)/x1)
-        if t_temp < t:
-            t = t_temp
-            normal = (-1, 0)
-    if y1 != 0:
-        t_temp = math.fabs((rect.bottom - k)/y1)
-        if t_temp>=0 and t_temp < t:
-            t = t_temp
-            normal = (0, 1)
-        t_temp = math.fabs((rect.top - k)/y1)
-        if t_temp>=0 and t_temp < t:
-            t = t_temp
-            normal = (0, -1)
-    return normal
-
-def death_function(ship):
-    ship.velocity = (0, 0)
-    ship.direction = 0
-    global death_timer
-    death_timer = DEATH_TIME
-    angles = 360/death_projectile_count
-    for i in range(0, death_projectile_count):
-        dlocation = ship.location
-        dvelocity = (math.sin(math.radians(angles*i))*death_projectile_speed, math.cos(math.radians(angles*i))*death_projectile_speed)
-        scale_factor = 0.25
-        scale_base = 3
-        thickness = 2
-        debris.append((dlocation, dvelocity, death_projectile_timer, scale_factor, scale_base, thickness, death_projectile_timer, BLACK))
-        
-def bullet_death(bullet, bullet_rect, obstacle_rect, b_vec):
-    rand_value = random.randint(min_bullet_debris, max_bullet_debris)
-    base_direction = bullet.direction
-    base_vel = (math.sin(math.radians(base_direction)), -math.cos(math.radians(base_direction)))
-    walln = calculate_normal(obstacle_rect, bullet_rect.center, b_vec)
-    wall_dir = math.degrees(math.atan2(walln[1], walln[0])) + 90
-    dot = walln[0]*base_vel[0] + walln[1]*base_vel[1]
-    reflection = (base_vel[0] - 2 * walln[0]*dot, base_vel[1] - 2*walln[1]*dot)
-    ref_dir = math.degrees(math.atan2(reflection[1], reflection[0])) + 90
-    for i in range(0, rand_value):
-        b_scatter = random.randint(0, bullet_debris_scatter)
-        b_speed = random.random()*bullet_debris_speed_range + bullet_debris_speed_min
-        direction = ref_dir + b_scatter - bullet_debris_scatter/2
-        if(direction > wall_dir + 90):
-            direction = wall_dir + 90
-        if(direction < wall_dir - 90):
-            direction = wall_dir - 90
-        dvel = (math.sin(math.radians(direction))*b_speed, -math.cos(math.radians(direction))*b_speed)
-        debris.append((bullet.location, dvel, bullet_debris_timer, 0, BULLET_SIZE/2, 0,bullet_debris_timer, BLUE))
         
 
 for i in range(0, 100):
@@ -154,7 +87,7 @@ while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             exit()
-    if death_timer<=0:
+    if not player_ship.isDead():
         sinD = math.sin(math.radians(player_ship.direction))
         cosD = math.cos(math.radians(player_ship.direction))
         keys = pygame.key.get_pressed()
@@ -175,21 +108,17 @@ while True:
     player_ship.update()
     
     for n in wall_list:
-        if player_ship.rect.colliderect(n) and death_timer<=0:
-            death_function(player_ship)
+        if player_ship.rect.colliderect(n) and player_ship.isDead():
+            player_ship.kill(DEATH_TIME)
+            Display.death_function(player_ship, debris, BLACK)
     
     camera.set_camera_loc((x, y))
     camera.bound_camera(map_dimensions)
         
-    if death_timer<=0:
+    if not player_ship.isDead():
         Display.draw_triangle(display, camera, BLACK, player_ship.location, player_ship.bounds, player_ship.direction, 2)
         if moved:
             Display.draw_triangle_offset(display, camera, RED, (player_ship.location[0], player_ship.location[1]+player_ship.bounds[1]*3/2), (player_ship.bounds[0]/2, player_ship.bounds[1]/2), player_ship.direction-180, player_ship.location, 2)
-    else:
-        death_timer-=1
-        if death_timer<=0:
-            player_ship.location = (320, 240)
-            player_ship.velocity = (0, 0)
         
     i = 0
     while i < len(debris):
@@ -212,7 +141,7 @@ while True:
         for n in wall_list:
             if n.colliderect(bullet.rect):
                 bullet.duration = 0
-                bullet_death(bulletList[i], bullet.rect, n, bullet.velocity)
+                Display.bullet_death(bulletList[i], bullet.rect, n, bullet.velocity, BULLET_SIZE/2, debris, BLUE)
         if bullet.duration>0:
             Display.draw_circle(display, camera, BLUE, bullet.location, BULLET_SIZE)
             i = i+1
