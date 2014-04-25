@@ -8,6 +8,7 @@ import pygame, math
 
 def default_respawn(ship):
     ship.location = (0, 0)
+    ship.rect.center = ship.location
     ship.velocity = (0, 0)
     ship.direction = 0
 
@@ -34,7 +35,7 @@ class Ship:
         if self.isDead():
             self.death_timer -= 1
             if not self.isDead():
-                self.respawn_func()
+                self.respawn_func(self)
         
     def turn(self, turn_speed):
         self.direction += turn_speed

@@ -13,6 +13,7 @@ from Bullet import Bullet
 
 def respawn_func(ship):
     ship.location = (320, 240)
+    ship.rect.center = ship.location
     ship.velocity = (0, 0)
     ship.direction = 0
 
@@ -108,9 +109,9 @@ while True:
     player_ship.update()
     
     for n in wall_list:
-        if player_ship.rect.colliderect(n) and player_ship.isDead():
+        if player_ship.rect.colliderect(n) and not player_ship.isDead():
             player_ship.kill(DEATH_TIME)
-            Display.death_function(player_ship, debris, BLACK)
+            Display.death_animation(player_ship, debris, BLACK)
     
     camera.set_camera_loc((x, y))
     camera.bound_camera(map_dimensions)

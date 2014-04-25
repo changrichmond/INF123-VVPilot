@@ -57,7 +57,7 @@ def draw_circle(display, camera, color, location, radius, thickness = 0):
     camy = cameraLocation[1] - cameraBounds[1]/2
     pygame.draw.circle(display, color, (int(location[0]-camx), int(location[1]-camy)), radius, thickness)
     
-def death_function(ship, debris, color):
+def death_animation(ship, debris, color):
     ship.velocity = (0, 0)
     ship.direction = 0
     angles = 360/death_projectile_count
