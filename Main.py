@@ -8,6 +8,7 @@ import pygame.gfxdraw
 from pygame.locals import *
 import Display
 from Ship import Ship
+from Camera import Camera
 
 pygame.init()
 pygame.key.set_repeat(15,15)
@@ -27,8 +28,10 @@ VELOCITY_CAP = 5
 SHOOT_DELAY = 10
 map_dimensions = (3200, 1800)
 camera_bounds = (854, 480)
+camera_start_location = (320, 240)
 
-camera = {'location':(320, 240), 'bounds':camera_bounds}
+# camera = {'location':(320, 240), 'bounds':camera_bounds}
+camera = Camera(camera_start_location, camera_bounds)
 
 #we legit now son
 pygame.display.set_caption("VV Pilot")
@@ -173,8 +176,8 @@ while True:
         if player_ship.rect.colliderect(n) and death_timer<=0:
             death_function(player_ship)
     
-    Display.set_camera_loc(camera, (x, y))
-    Display.bound_camera(camera, map_dimensions)
+    camera.set_camera_loc((x, y))
+    camera.bound_camera(map_dimensions)
         
     if death_timer<=0:
         Display.draw_triangle(display, camera, BLACK, player_ship.location, player_ship.bounds, player_ship.direction, 2)
