@@ -5,6 +5,7 @@ Created on Apr 17, 2014
 '''
 
 import pygame, math, random
+import Utility
 
 death_projectile_count = 10
 death_projectile_timer = 30
@@ -67,40 +68,12 @@ def death_function(ship, debris, color):
         scale_base = 3
         thickness = 2
         debris.append((dlocation, dvelocity, death_projectile_timer, scale_factor, scale_base, thickness, death_projectile_timer, color))
-
-def calculate_normal(rect, point1, vector):
-    #lets solve this using the parametric equation
-    point2 = (point1[0] + vector[0], point1[1] + vector[1])
-    h, k = point1
-    p, q = point2
-    x1 = p - h
-    y1 = q - k
-    normal = (1, 0)
-    t = 9999999.9999 #a really large number
-    if x1 != 0:
-        t_temp = math.fabs((rect.right - h)/x1)
-        t = t_temp
-        t_temp = math.fabs((rect.left - h)/x1)
-        if t_temp < t:
-            t = t_temp
-            normal = (-1, 0)
-    if y1 != 0:
-        t_temp = math.fabs((rect.bottom - k)/y1)
-        if t_temp>=0 and t_temp < t:
-            t = t_temp
-            normal = (0, 1)
-        t_temp = math.fabs((rect.top - k)/y1)
-        if t_temp>=0 and t_temp < t:
-            t = t_temp
-            normal = (0, -1)
-    return normal
-
         
 def bullet_death(bullet, bullet_rect, obstacle_rect, b_vec, bullet_size, debris, color):
     rand_value = random.randint(min_bullet_debris, max_bullet_debris)
     base_direction = bullet.direction
     base_vel = (math.sin(math.radians(base_direction)), -math.cos(math.radians(base_direction)))
-    walln = calculate_normal(obstacle_rect, bullet_rect.center, b_vec)
+    walln = Utility.calculate_normal(obstacle_rect, bullet_rect.center, b_vec)
     wall_dir = math.degrees(math.atan2(walln[1], walln[0])) + 90
     dot = walln[0]*base_vel[0] + walln[1]*base_vel[1]
     reflection = (base_vel[0] - 2 * walln[0]*dot, base_vel[1] - 2*walln[1]*dot)
