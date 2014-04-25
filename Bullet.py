@@ -19,6 +19,7 @@ class Bullet:
     def update(self):
         self.duration -= 1
         self.location = (self.location[0] + self.velocity[0], self.location[1] + self.velocity[1])
+        self.rect.center = self.location
         
     def is_dead(self):
         return self.duration <= 0

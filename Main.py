@@ -9,6 +9,7 @@ from pygame.locals import *
 import Display
 from Ship import Ship
 from Camera import Camera
+from Bullet import Bullet
 
 pygame.init()
 pygame.key.set_repeat(15,15)
@@ -110,7 +111,7 @@ def death_function(ship):
         
 def bullet_death(bullet, bullet_rect, obstacle_rect, b_vec):
     rand_value = random.randint(min_bullet_debris, max_bullet_debris)
-    base_direction = bullet[2]
+    base_direction = bullet.direction
     base_vel = (math.sin(math.radians(base_direction)), -math.cos(math.radians(base_direction)))
     walln = calculate_normal(obstacle_rect, bullet_rect.center, b_vec)
     wall_dir = math.degrees(math.atan2(walln[1], walln[0])) + 90
@@ -126,7 +127,7 @@ def bullet_death(bullet, bullet_rect, obstacle_rect, b_vec):
         if(direction < wall_dir - 90):
             direction = wall_dir - 90
         dvel = (math.sin(math.radians(direction))*b_speed, -math.cos(math.radians(direction))*b_speed)
-        debris.append(((bullet[0], bullet[1]), dvel, bullet_debris_timer, 0, BULLET_SIZE/2, 0,bullet_debris_timer, BLUE))
+        debris.append((bullet.location, dvel, bullet_debris_timer, 0, BULLET_SIZE/2, 0,bullet_debris_timer, BLUE))
         
 
 for i in range(0, 100):
@@ -165,7 +166,8 @@ while True:
         if keys[K_d] or keys[K_RIGHT]:
             player_ship.turn_right()
         if keys[K_SPACE] and player_ship.delay<=0:
-            bullet = (x + dimy*sinD, y-dimy*cosD, player_ship.direction, BULLET_DURATION)
+            bullet = Bullet((x + dimy*sinD, y-dimy*cosD), (BULLET_SIZE, BULLET_SIZE), player_ship.direction, (BULLET_SPEED*sinD, -BULLET_SPEED*cosD), BULLET_DURATION)
+            #bullet = (x + dimy*sinD, y-dimy*cosD, player_ship.direction, BULLET_DURATION)
             bulletList.append(bullet)
             player_ship.delay = SHOOT_DELAY
             player_ship.move_from_force_in_direction(player_ship.acceleration, player_ship.direction+180)
@@ -205,32 +207,17 @@ while True:
     i = 0
     while i < len(bulletList):
         
-        bx, by, bdir, bdur = bulletList[i]
-        bsinD = math.sin(math.radians(bdir))
-        bcosD = math.cos(math.radians(bdir))
-        bdur = bdur - 1
-        bspeed = (BULLET_SPEED*bsinD, -BULLET_SPEED*bcosD)
-        bulletList[i] = (bx + bspeed[0], by + bspeed[1], bdir, bdur)
-        bx, by, bdir, bdur = bulletList[i]
-        rect = pygame.Rect(bx-BULLET_SIZE, by-BULLET_SIZE, BULLET_SIZE*2, BULLET_SIZE*2)
+        bullet = bulletList[i]
+        bullet.update()
         for n in wall_list:
-            if n.colliderect(rect):
-                bulletList[i] = (bx - bspeed[0], by - bspeed[1], bdir, 0)
-                bullet_death(bulletList[i], rect, n, bspeed)
-                bx, by, bdir, bdur = bulletList[i]
-                rect = pygame.Rect(bx-BULLET_SIZE, by-BULLET_SIZE, BULLET_SIZE*2, BULLET_SIZE*2)
-                clip_rect = rect.clip(n)
-                if clip_rect.w < clip_rect.h:
-                    bx = bx - clip_rect.w
-                else:
-                    by = by - clip_rect.h
-                bx, by, bdir, bdur = bulletList[i]
-        if bulletList[i][3]>0:
-            Display.draw_circle(display, camera, BLUE, (bx, by), BULLET_SIZE)
-        if bdur <= 0:
-            bulletList.remove(bulletList[i])
-        else:
+            if n.colliderect(bullet.rect):
+                bullet.duration = 0
+                bullet_death(bulletList[i], bullet.rect, n, bullet.velocity)
+        if bullet.duration>0:
+            Display.draw_circle(display, camera, BLUE, bullet.location, BULLET_SIZE)
             i = i+1
+        else:
+            bulletList.remove(bulletList[i])
     for n in wall_list:
         Display.draw_rect(display, camera, GREEN, n, 2)
     
