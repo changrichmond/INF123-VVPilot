@@ -11,6 +11,8 @@ from Ship import Ship
 from Camera import Camera
 from Bullet import Bullet
 
+ipAddress = raw_input("Enter IP Address: ")
+
 def respawn_func(ship):
     ship.location = (320, 240)
     ship.rect.center = ship.location
