@@ -18,6 +18,17 @@ def respawn_func(ship):
     ship.rect.center = ship.location
     ship.velocity = (0, 0)
     ship.direction = 0
+    
+def read_input(onMove, onTurnLeft, onTurnRight, onShoot):
+    keys = pygame.key.get_pressed()
+    if keys[K_w] or keys[K_UP]:
+        onMove()
+    if keys[K_a] or keys[K_LEFT]:
+        onTurnLeft()
+    if keys[K_d] or keys[K_RIGHT]:
+        onTurnRight()
+    if keys[K_SPACE]:
+        onShoot()
 
 pygame.init()
 pygame.key.set_repeat(15,15)
