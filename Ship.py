@@ -26,6 +26,7 @@ class Ship:
         self.turn_rate = turn_rate
         self.death_timer = 0
         self.respawn_func = respawn_func
+        self.moved = False
         
     def update(self):
         self.location = (self.location[0] + self.velocity[0], self.location[1] + self.velocity[1])
