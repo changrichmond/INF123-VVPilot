@@ -153,7 +153,7 @@ while True:
         for n in wall_list:
             if n.colliderect(bullet.rect):
                 bullet.duration = 0
-                Display.bullet_death(bulletList[i], bullet.rect, n, bullet.velocity, BULLET_SIZE/2, debris, BLUE)
+                Display.bullet_death(bulletList[i], n, BULLET_SIZE/2, debris, BLUE)
         if bullet.duration>0:
             Display.draw_circle(display, camera, BLUE, bullet.location, BULLET_SIZE)
             i = i+1

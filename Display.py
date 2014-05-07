@@ -69,11 +69,11 @@ def death_animation(ship, debris, color):
         thickness = 2
         debris.append((dlocation, dvelocity, death_projectile_timer, scale_factor, scale_base, thickness, death_projectile_timer, color))
         
-def bullet_death(bullet, bullet_rect, obstacle_rect, b_vec, bullet_size, debris, color):
+def bullet_death(bullet, obstacle_rect, debris, color):
     rand_value = random.randint(min_bullet_debris, max_bullet_debris)
     base_direction = bullet.direction
     base_vel = (math.sin(math.radians(base_direction)), -math.cos(math.radians(base_direction)))
-    walln = Utility.calculate_normal(obstacle_rect, bullet_rect.center, b_vec)
+    walln = Utility.calculate_normal(obstacle_rect, bullet.rect.center, bullet.velocity)
     wall_dir = math.degrees(math.atan2(walln[1], walln[0])) + 90
     dot = walln[0]*base_vel[0] + walln[1]*base_vel[1]
     reflection = (base_vel[0] - 2 * walln[0]*dot, base_vel[1] - 2*walln[1]*dot)
@@ -87,5 +87,5 @@ def bullet_death(bullet, bullet_rect, obstacle_rect, b_vec, bullet_size, debris,
         if(direction < wall_dir - 90):
             direction = wall_dir - 90
         dvel = (math.sin(math.radians(direction))*b_speed, -math.cos(math.radians(direction))*b_speed)
-        debris.append((bullet.location, dvel, bullet_debris_timer, 0, bullet_size, 0, bullet_debris_timer, color))
+        debris.append((bullet.location, dvel, bullet_debris_timer, 0, bullet.bounds[0]/2, 0, bullet_debris_timer, color))
     

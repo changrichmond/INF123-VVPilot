@@ -4,56 +4,51 @@ Created on Apr 29, 2014
 @author: john
 '''
 
-import pygame, math, random
-from pygame.locals import *
-from Ship import Ship
-from Bullet import Bullet
-from Camera import Camera
-
-
-
-bulletList = []
-
-wall_list = []
-
-ship_list = []
-
-ship_controllers = []
+from Events import Broadcaster
 
 DEATH_TIME = 120
 
-camera_bounds = (854, 480)
-camera_start_location = (320, 240)
-
-# camera = {'location':(320, 240), 'bounds':camera_bounds}
-camera = Camera(camera_start_location, camera_bounds)
-
-# pygame.draw.polygon(display, RED, [(x-dimx, y+dimy), (x+dimx, y+dimy), (x, y-dimy)], 1)
-# pygame.display.update()
-
-def doLogic(ship_list, bullet_list, wall_list):
-#     x, y = player_ship.location
-#     velx, vely = player_ship.velocity
-#     dimx, dimy = player_ship.bounds
-    
-    for ship in ship_list:
-        ship.update()
-    
-    for n in wall_list:
-        for ship in ship_list:
-            if ship.rect.colliderect(n) and not ship.isDead():
-                ship.kill(DEATH_TIME)
-    
-    
-    i = 0
-    while i < len(bulletList):
+class Logic:
+    def __init__(self):
+        #event system
+        self.onShipDeath = Broadcaster()
+        self.onBulletDeath = Broadcaster()
+        self.onShipUpdate = Broadcaster()
+        self.onBulletUpdate = Broadcaster()
         
-        bullet = bulletList[i]
-        bullet.update()
-        for n in wall_list:
-            if n.colliderect(bullet.rect):
-                bullet.duration = 0
-        if bullet.duration>0:
-            i = i+1
-        else:
-            bulletList.remove(bulletList[i])
+        #required data
+        self.bullet_list = []
+        self.wall_list = []
+        self.ship_list = []
+        
+    def doLogic(self):
+        for ship in self.ship_list:
+            ship.update()
+            self.onShipUpdate.fire(ship)
+    
+        for ship in self.ship_list:
+            for n in self.wall_list:
+                if ship.rect.colliderect(n) and not ship.isDead():
+                    ship.kill(DEATH_TIME)
+                    self.onShipDeath.fire(ship)
+            for n in self.bullet_list:
+                if ship.rect.colliderect(n) and not ship.isDead() and ship is not n.ship:
+                    ship.kill(DEATH_TIME)
+                    self.onShipDeath.fire(ship)
+                    n.duration = 0
+    
+    
+        i = 0
+        while i < len(self.bullet_list):
+        
+            bullet = self.bullet_list[i]
+            bullet.update()
+            self.onBulletUpdate.fire(bullet)
+            for n in self.wall_list:
+                if n.colliderect(bullet.rect):
+                    bullet.duration = 0
+                    self.onBulletDeath.fire(bullet, n)
+            if bullet.duration>0:
+                i = i+1
+            else:
+                self.bullet_list.remove(self.bullet_list[i])
