@@ -15,6 +15,7 @@ class Logic:
         self.onBulletDeath = Broadcaster()
         self.onShipUpdate = Broadcaster()
         self.onBulletUpdate = Broadcaster()
+        self.onLogicUpdate = Broadcaster()
         
         #required data
         self.bullet_list = []
@@ -52,3 +53,4 @@ class Logic:
                 i = i+1
             else:
                 self.bullet_list.remove(self.bullet_list[i])
+        self.onLogicUpdate.fire(self)
