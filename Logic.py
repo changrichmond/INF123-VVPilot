@@ -54,3 +54,5 @@ class Logic:
             else:
                 self.bullet_list.remove(self.bullet_list[i])
         self.onLogicUpdate.fire(self)
+        for ship in self.ship_list:
+            ship.moved = False

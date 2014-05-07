@@ -63,6 +63,7 @@ class Ship:
             
     def kill(self, death_time):
         self.death_timer = death_time
+        self.velocity = (0, 0)
         
     def isDead(self):
         return self.death_timer > 0

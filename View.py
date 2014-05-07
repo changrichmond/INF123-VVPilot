@@ -64,7 +64,6 @@ class View:
         Display.death_animation(ship, self.debris, BLACK)
         
     def onBulletDeath(self, bullet, wall_rect):
-        print 'bullet death'
         Display.bullet_death(bullet, wall_rect, self.debris, BLUE)
         
     def draw_ship(self, ship):

@@ -8,7 +8,7 @@ import pygame
 
 class Bullet:
     
-    def __init__(self, location, bounds, direction, velocity, duration, ship):
+    def __init__(self, location, bounds, direction, velocity, duration = 0, ship = None):
         self.location = location
         self.bounds = bounds
         self.direction = direction

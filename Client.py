@@ -4,7 +4,7 @@ Created on Apr 30, 2014
 @author: john
 '''
 
-import pygame, random
+import pygame, random, Serialize
 from threading import Thread
 from pygame.locals import *
 from network import *
@@ -14,22 +14,25 @@ from Ship import Ship
 
 from Events import Broadcaster
 
-class ClientController():
+class ClientEventSystem():
     def __init__(self):
         self.onShipDeath = Broadcaster()
         self.onBulletDeath = Broadcaster()
     
+class ClientController():
+    def __init__(self, handler):
+        self.handler = handler
     def move_ship(self):
-        pass
+        self.handler.do_send({'control':'move'})
     
     def turn_left(self):
-        pass
+        self.handler.do_send({'control':'left'})
     
     def turn_right(self):
-        pass
+        self.handler.do_send({'control':'right'})
     
     def shoot(self):
-        pass
+        self.handler.do_send({'control':'shoot'})
 
 class Client(Handler):
     def __init__(self, host, port, view, client_controller):
@@ -43,24 +46,26 @@ class Client(Handler):
     def on_msg(self, msg):
         if 'start' in msg:
             for wall in msg['start']:
-                self.view.wall_list.append(wall)
+                self.view.wall_list.append(Serialize.deserializeRect(wall))
         elif 'update' in msg:
-            self.view.ship_list = msg['update']['ships']
-            self.view.bullet_list = msg['update']['bullets']
+            self.view.ship_list = [Serialize.deserializeShip(ship) for ship in msg['update']['ships']]
+            self.view.bullet_list = [Serialize.deserializeBullet(bullet) for bullet in msg['update']['bullets']]
             self.view.set_camera_loc(msg['update']['location'])
             for ship_ID in msg['update']['ship_deaths']:
-                self.controller.onShipDeath.fire(ship_ID)
+                self.controller.onShipDeath.fire(Serialize.deserializeShip(ship_ID))
             for bullet_ID in msg['update']['bullet_deaths']:
-                self.controller.onBulletDeath.fire(bullet_ID[0], bullet_ID[1])                                                                           
+                self.controller.onBulletDeath.fire(Serialize.deserializeBullet(bullet_ID[0]), Serialize.deserializeRect(bullet_ID[1]))                                                                           
 
 map_dimensions = (3200, 1800)
 
 camera_bounds = (854, 480)
 
-controller = ClientController()
-view = View(camera_bounds, controller, map_dimensions)
+cevent = ClientEventSystem()
+view = View(camera_bounds, cevent, map_dimensions)
 host, port = 'localhost', 8888
-client = Client(host, port, view, controller)
+client = Client(host, port, view, cevent)
+
+controller = ClientController(client)
 
 
 def read_input(onMove, onTurnLeft, onTurnRight, onShoot):

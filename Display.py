@@ -73,7 +73,7 @@ def bullet_death(bullet, obstacle_rect, debris, color):
     rand_value = random.randint(min_bullet_debris, max_bullet_debris)
     base_direction = bullet.direction
     base_vel = (math.sin(math.radians(base_direction)), -math.cos(math.radians(base_direction)))
-    walln = Utility.calculate_normal(obstacle_rect, bullet.rect.center, bullet.velocity)
+    walln = Utility.calculate_normal(obstacle_rect, (bullet.location[0]+bullet.bounds[0]/2, bullet.location[1]+bullet.bounds[1]/2), bullet.velocity)
     wall_dir = math.degrees(math.atan2(walln[1], walln[0])) + 90
     dot = walln[0]*base_vel[0] + walln[1]*base_vel[1]
     reflection = (base_vel[0] - 2 * walln[0]*dot, base_vel[1] - 2*walln[1]*dot)

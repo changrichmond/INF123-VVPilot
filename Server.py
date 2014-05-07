@@ -1,5 +1,5 @@
 from network import *
-import pygame, random
+import pygame, random, Serialize
 from Logic import Logic
 from Ship import Ship
 from ServerSideController import ServerSideController
@@ -46,19 +46,32 @@ class MyHandler(Handler):
         player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY, respawn_func)
         logic.ship_list.append(player_ship)
         self.controller = ServerSideController(player_ship, logic, BULLET_SIZE, BULLET_SPEED, BULLET_DURATION, SHOOT_DELAY)
-        self.do_send({'start': logic.wall_list})
+        self.do_send({'start': [Serialize.serializeRect(wall) for wall in logic.wall_list]})
         logic.onLogicUpdate+=self.onLogicUpdate
+        handlers.append(self)
      
     def onLogicUpdate(self, logic):
         msg = {'update':
-               {'ships': logic.ship_list, 'bullets': logic.bullet_list, 'location': self.controller.player_ship.location,
-                 'ship_deaths': event_log.ship_deaths, 'bullet_deaths': event_log.bullet_deaths} }
+               {'ships': [Serialize.serializeShip(ship) for ship in logic.ship_list], 
+                'bullets': [Serialize.serializeBullet(bullet) for bullet in logic.bullet_list], 
+                'location': self.controller.player_ship.location,
+                 'ship_deaths': [Serialize.serializeShip(ship) for ship in event_log.ship_deaths], 
+                 'bullet_deaths': [(Serialize.serializeBullet(bullet[0]), Serialize.serializeRect(bullet[1])) for bullet in event_log.bullet_deaths ]} }
+        self.do_send(msg)
               
     def on_close(self):
-        pass
+        logic.ship_list.remove(self.controller.player_ship)
      
     def on_msg(self, msg):
-        pass
+        if 'control' in msg:
+            if msg['control'] == 'move':
+                self.controller.move_ship()
+            elif msg['control'] == 'left':
+                self.controller.turn_left()
+            elif msg['control'] == 'right':
+                self.controller.turn_right()
+            elif msg['control'] == 'shoot':
+                self.controller.shoot()
 
 
 
@@ -80,4 +93,6 @@ clock = pygame.time.Clock()
 while 1:
     clock.tick(60)
     logic.doLogic()
-    poll(timeout=0.05) # in seconds
+    event_log.bullet_deaths = []
+    event_log.ship_deaths = []
+    poll(timeout=0.0125) # in seconds
