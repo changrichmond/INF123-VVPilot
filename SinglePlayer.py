@@ -45,7 +45,8 @@ BULLET_SIZE = 5
 ANGULAR_VELOCITY = 4
 VELOCITY_CAP = 5
 SHOOT_DELAY = 10
-NUM_BOTS = 100
+NUM_BOTS = 10
+NUM_WALLS = 20
 map_dimensions = (3200, 1800)
 
 camera_bounds = (854, 480)
@@ -90,7 +91,7 @@ for i  in range(0, NUM_BOTS):
     logic.ship_list.append(ship)
     botControllers.append(run_bot_func(ship))
 
-for i in range(0, 20):
+for i in range(0, NUM_WALLS):
     x = random.randint(player_ship.location[0], 3200-player_ship.location[0])
     y = random.randint(player_ship.location[1], 1800-player_ship.location[1])
     w = random.randint(100, 200)
