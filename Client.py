@@ -4,7 +4,7 @@ Created on Apr 30, 2014
 @author: john
 '''
 
-import pygame, random, Serialize
+import pygame, random, Serialize, time
 from threading import Thread
 from pygame.locals import *
 from network import *
@@ -60,6 +60,9 @@ map_dimensions = (3200, 1800)
 
 camera_bounds = (854, 480)
 
+frame_rate = 60.0
+frame_duration = 1.0/frame_rate
+
 cevent = ClientEventSystem()
 view = View(camera_bounds, cevent, map_dimensions)
 host, port = 'localhost', 8888
@@ -83,16 +86,16 @@ def read_input(onMove, onTurnLeft, onTurnRight, onShoot):
 # view.bullet_list = logic.bullet_list
 # view.ship_list = logic.ship_list
 
-def periodic_poll():
-    while 1:
-        poll(timeout=0.0125)
-
-clock = pygame.time.Clock()
-thread = Thread(target=periodic_poll)
-thread.daemon = True  # die when the main thread dies 
-thread.start()
+# def periodic_poll():
+#     while 1:
+#         poll(timeout=0.0125)
+# 
+# clock = pygame.time.Clock()
+# thread = Thread(target=periodic_poll)
+# thread.daemon = True  # die when the main thread dies 
+# thread.start()
 while 1:
-    clock.tick(60)
+    start_time = time.time()
     for event in pygame.event.get():
         if event.type == QUIT:
             exit()
@@ -100,3 +103,5 @@ while 1:
     read_input(controller.move_ship, controller.turn_left, controller.turn_right, controller.shoot)
     
     view.draw_everything()
+    while time.time() - start_time < frame_duration:
+        poll(frame_duration - (time.time() - start_time))
