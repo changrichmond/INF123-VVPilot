@@ -85,7 +85,7 @@ def read_input(onMove, onTurnLeft, onTurnRight, onShoot):
 
 def periodic_poll():
     while 1:
-        poll(timeout=0.05)
+        poll(timeout=0.0125)
 
 clock = pygame.time.Clock()
 thread = Thread(target=periodic_poll)
