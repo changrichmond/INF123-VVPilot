@@ -10,6 +10,17 @@ def respawn_func(ship):
     ship.velocity = (0, 0)
     ship.direction = 0
     
+def random_respawn(minLoc, maxLoc):
+    def respawn(ship):
+        ship.location = (random.randint(minLoc[0], maxLoc[0]), random.randint(minLoc[1], maxLoc[1]))
+        ship.rect.center = ship.location
+        ship.velocity = (0, 0)
+        ship.direction = 0
+    return respawn
+
+min_respawn = (320, 240)
+max_respawn = (3000, 1600)
+    
 SPEED = 0.075
 BULLET_SPEED = 10
 BULLET_DURATION = 60
@@ -19,6 +30,8 @@ VELOCITY_CAP = 5
 SHOOT_DELAY = 10
 
 map_dimensions = (3200, 1800)
+
+num_walls = 20
 
 handlers = []
 
@@ -43,7 +56,7 @@ class MyHandler(Handler):
     
     def on_open(self):
         # Grouped together to handle multiple players (new connection)
-        player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY, respawn_func)
+        player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY, random_respawn(min_respawn, max_respawn))
         logic.ship_list.append(player_ship)
         self.controller = ServerSideController(player_ship, logic, BULLET_SIZE, BULLET_SPEED, BULLET_DURATION, SHOOT_DELAY)
         self.do_send({'start': [Serialize.serializeRect(wall) for wall in logic.wall_list]})
@@ -75,7 +88,7 @@ class MyHandler(Handler):
 
 
 
-for i in range(0, 100):
+for i in range(0, num_walls):
     x = random.randint(400, 3200)
     y = random.randint(400, 1800)
     w = random.randint(100, 200)

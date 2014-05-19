@@ -13,7 +13,7 @@ def default_respawn(ship):
     ship.direction = 0
 
 class Ship:
-    def __init__(self, location, bounds, shoot_delay, acceleration, max_speed, turn_rate, respawn_func = default_respawn, direction = 0, velocity = (0.0, 0.0)):
+    def __init__(self, location, bounds, shoot_delay, acceleration, max_speed, turn_rate, respawn_func = default_respawn, direction = 0, velocity = (0.0, 0.0), shield_duration = 120):
         self.location = location
         self.bounds = bounds
         self.shoot_delay = shoot_delay
@@ -27,12 +27,19 @@ class Ship:
         self.death_timer = 0
         self.respawn_func = respawn_func
         self.moved = False
-        
+        self.shield_duration = self.shield = shield_duration*2
+        self.shield_obj = None
     def update(self):
         self.location = (self.location[0] + self.velocity[0], self.location[1] + self.velocity[1])
         self.rect.center = self.location
         if self.delay>0:
             self.delay = self.delay-1
+        if self.shield < self.shield_duration and not self.shield_obj:
+            self.shield+=1
+        if self.shield_obj:
+            self.shield-=2
+            if self.shield<=0:
+                self.shield_obj = None
         if self.isDead():
             self.death_timer -= 1
             if not self.isDead():
@@ -67,6 +74,10 @@ class Ship:
         
     def isDead(self):
         return self.death_timer > 0
-          
-
+    
+    def can_toggle_shield(self, flag):
+        return not flag or self.shield>self.shield_duration/8
+    
+    def toggle_shield(self, flag):
+        self.is_shielded = flag
     
