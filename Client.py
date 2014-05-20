@@ -33,6 +33,9 @@ class ClientController():
     
     def shoot(self):
         self.handler.do_send({'control':'shoot'})
+        
+    def shield_on(self):
+        self.handler.do_send({'control':'shield_on'})
 
 class Client(Handler):
     def __init__(self, host, port, view, client_controller):
@@ -71,7 +74,7 @@ client = Client(host, port, view, cevent)
 controller = ClientController(client)
 
 
-def read_input(onMove, onTurnLeft, onTurnRight, onShoot):
+def read_input(onMove, onTurnLeft, onTurnRight, onShoot, onShield):
     keys = pygame.key.get_pressed()
     if keys[K_w] or keys[K_UP]:
         onMove()
@@ -81,6 +84,8 @@ def read_input(onMove, onTurnLeft, onTurnRight, onShoot):
         onTurnRight()
     if keys[K_SPACE]:
         onShoot()
+    if keys[K_s]:
+        onShield()
 
 # view.wall_list = logic.wall_list
 # view.bullet_list = logic.bullet_list
@@ -100,7 +105,7 @@ while 1:
         if event.type == QUIT:
             exit()
 #     player_ship.moved = False
-    read_input(controller.move_ship, controller.turn_left, controller.turn_right, controller.shoot)
+    read_input(controller.move_ship, controller.turn_left, controller.turn_right, controller.shoot, controller.shield_on)
     
     view.draw_everything()
     while time.time() - start_time < frame_duration:

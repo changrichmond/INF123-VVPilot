@@ -28,6 +28,7 @@ BULLET_SIZE = 5
 ANGULAR_VELOCITY = 4
 VELOCITY_CAP = 5
 SHOOT_DELAY = 10
+SHIELD_SIZE = 20
 
 map_dimensions = (3200, 1800)
 
@@ -58,7 +59,7 @@ class MyHandler(Handler):
         # Grouped together to handle multiple players (new connection)
         player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY, random_respawn(min_respawn, max_respawn))
         logic.ship_list.append(player_ship)
-        self.controller = ServerSideController(player_ship, logic, BULLET_SIZE, BULLET_SPEED, BULLET_DURATION, SHOOT_DELAY)
+        self.controller = ServerSideController(player_ship, logic, BULLET_SIZE, BULLET_SPEED, BULLET_DURATION, SHOOT_DELAY, SHIELD_SIZE)
         self.do_send({'start': [Serialize.serializeRect(wall) for wall in logic.wall_list]})
         logic.onLogicUpdate+=self.onLogicUpdate
         handlers.append(self)
@@ -85,6 +86,8 @@ class MyHandler(Handler):
                 self.controller.turn_right()
             elif msg['control'] == 'shoot':
                 self.controller.shoot()
+            elif msg['control'] == 'shield_on':
+                self.controller.shield_on()
 
 
 
