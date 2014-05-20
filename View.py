@@ -71,6 +71,8 @@ class View:
             Display.draw_triangle(self.display, self.camera, BLACK, ship.location, ship.bounds, ship.direction, 2)
             if ship.moved:
                 Display.draw_triangle_offset(self.display, self.camera, RED, (ship.location[0], ship.location[1]+ship.bounds[1]*3/2), (ship.bounds[0]/2, ship.bounds[1]/2), ship.direction-180, ship.location, 2)
+            if ship.shield_obj:
+                Display.draw_rect(self.display, self.camera, GREEN, ship.shield_obj, 2)
                 
     def draw_bullet(self, bullet):
         Display.draw_circle(self.display, self.camera, BLUE, bullet.location, bullet.bounds[0])

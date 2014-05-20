@@ -27,7 +27,7 @@ def random_respawn(minLoc, maxLoc):
         ship.direction = 0
     return respawn
     
-def read_input(onMove, onTurnLeft, onTurnRight, onShoot):
+def read_input(onMove, onTurnLeft, onTurnRight, onShoot, onShield):
     keys = pygame.key.get_pressed()
     if keys[K_w] or keys[K_UP]:
         onMove()
@@ -37,6 +37,9 @@ def read_input(onMove, onTurnLeft, onTurnRight, onShoot):
         onTurnRight()
     if keys[K_SPACE]:
         onShoot()
+    if keys[K_s]:
+        onShield()
+    
 
 SPEED = 0.075
 BULLET_SPEED = 10
@@ -45,7 +48,8 @@ BULLET_SIZE = 5
 ANGULAR_VELOCITY = 4
 VELOCITY_CAP = 5
 SHOOT_DELAY = 10
-NUM_BOTS = 100
+SHIELD_SIZE = 20
+NUM_BOTS = 10
 NUM_WALLS = 20
 map_dimensions = (3200, 1800)
 
@@ -60,9 +64,9 @@ max_respawn = (3000, 1600)
 respawn = random_respawn(min_respawn, max_respawn)
 
 player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY, respawn)
-logic.ship_list.append(player_ship)
+logic.add_ship(player_ship)
 
-controller = ServerSideController(player_ship, logic, BULLET_SIZE, BULLET_SPEED, BULLET_DURATION, SHOOT_DELAY)
+controller = ServerSideController(player_ship, logic, BULLET_SIZE, BULLET_SPEED, BULLET_DURATION, SHOOT_DELAY, SHIELD_SIZE)
 
 def run_bot_func(bot):
     def on_run():
@@ -88,7 +92,7 @@ botControllers = []
 
 for i  in range(0, NUM_BOTS):
     ship = Ship((random.randint(min_respawn[0], max_respawn[0]), random.randint(min_respawn[1], max_respawn[1])), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY, respawn)
-    logic.ship_list.append(ship)
+    logic.add_ship(ship)
     botControllers.append(run_bot_func(ship))
 
 for i in range(0, NUM_WALLS):
@@ -115,7 +119,7 @@ while 1:
         if event.type == QUIT:
             exit()
     logic.doLogic()
-    read_input(controller.move_ship, controller.turn_left, controller.turn_right, controller.shoot)
+    read_input(controller.move_ship, controller.turn_left, controller.turn_right, controller.shoot, controller.shield_on)
     for bot in botControllers:
         bot()
     view.set_camera_loc(player_ship.location)
