@@ -36,6 +36,8 @@ class ClientController():
         
     def shield_on(self):
         self.handler.do_send({'control':'shield_on'})
+        
+running = 1
 
 class Client(Handler):
     def __init__(self, host, port, view, client_controller):
@@ -44,7 +46,8 @@ class Client(Handler):
         self.controller = client_controller
     
     def on_close(self):
-        pass
+        global running
+        running = 0
     
     def on_msg(self, msg):
         if 'start' in msg:
@@ -99,7 +102,7 @@ def read_input(onMove, onTurnLeft, onTurnRight, onShoot, onShield):
 # thread = Thread(target=periodic_poll)
 # thread.daemon = True  # die when the main thread dies 
 # thread.start()
-while 1:
+while running:
     start_time = time.time()
     for event in pygame.event.get():
         if event.type == QUIT:
