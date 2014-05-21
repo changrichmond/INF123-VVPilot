@@ -22,3 +22,9 @@ class scoreboard:
         if kill_ship in self.score_map:
             tup = self.score_map[kill_ship]
             self.score_map[kill_ship] = (tup[0]+1, tup[1], tup[2])
+            
+    def increment_score(self, ship):
+        if ship in self.score_map:
+            tup = self.score_map[ship]
+            self.score_map[ship] = (tup[0], tup[1], tup[2]+1)
+            print str(ship) + "'s score is now " + str(self.score_map[ship])

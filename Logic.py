@@ -39,10 +39,6 @@ class Logic:
         velo = (-1*velocity[0], -1*velocity[1])
         dot_prod = velo[0]*normal[0] + velo[1]*normal[1]
         rvelo = (2*dot_prod*normal[0] - velo[0], 2*dot_prod*normal[1] - velo[1])
-        print 'velo'
-        print velocity
-        print 'relfection velo'
-        print rvelo
         return rvelo
         
     def doLogic(self):
