@@ -4,19 +4,19 @@ Created on May 27, 2014
 @author: john
 '''
 
-import random, Serialize, time
+import random, time
 # from threading import Thread
 from network import *
 
 # from View import View
-from Ship import Ship
+#from Ship import Ship
 
-from Events import Broadcaster
+# from Events import Broadcaster
 
-class ClientEventSystem():
-    def __init__(self):
-        self.onShipDeath = Broadcaster()
-        self.onBulletDeath = Broadcaster()
+# class ClientEventSystem():
+#     def __init__(self):
+#         self.onShipDeath = Broadcaster()
+#         self.onBulletDeath = Broadcaster()
     
 class ClientController():
     def __init__(self, handler):
@@ -73,17 +73,18 @@ class Client(Handler):
         running = 0
     
     def on_msg(self, msg):
-        if 'start' in msg:
-            for wall in msg['start']:
-                self.view.wall_list.append(Serialize.deserializeRect(wall))
-        elif 'update' in msg:
-            self.view.ship_list = [Serialize.deserializeShip(ship) for ship in msg['update']['ships']]
-            self.view.bullet_list = [Serialize.deserializeBullet(bullet) for bullet in msg['update']['bullets']]
-            self.view.set_camera_loc(msg['update']['location'])
-            for ship_ID in msg['update']['ship_deaths']:
-                self.controller.onShipDeath.fire(Serialize.deserializeShip(ship_ID))
-            for bullet_ID in msg['update']['bullet_deaths']:
-                self.controller.onBulletDeath.fire(Serialize.deserializeBullet(bullet_ID[0]), Serialize.deserializeRect(bullet_ID[1]))                                                                           
+        pass
+#         if 'start' in msg:
+# #             for wall in msg['start']:
+# #                 self.view.wall_list.append(Serialize.deserializeRect(wall))
+#         elif 'update' in msg:
+# #             self.view.ship_list = [Serialize.deserializeShip(ship) for ship in msg['update']['ships']]
+# #             self.view.bullet_list = [Serialize.deserializeBullet(bullet) for bullet in msg['update']['bullets']]
+#             self.view.set_camera_loc(msg['update']['location'])
+#             for ship_ID in msg['update']['ship_deaths']:
+#                 self.controller.onShipDeath.fire(Serialize.deserializeShip(ship_ID))
+#             for bullet_ID in msg['update']['bullet_deaths']:
+#                 self.controller.onBulletDeath.fire(Serialize.deserializeBullet(bullet_ID[0]), Serialize.deserializeRect(bullet_ID[1]))                                                                           
 
 map_dimensions = (3200, 1800)
 
@@ -92,10 +93,10 @@ camera_bounds = (854, 480)
 frame_rate = 60.0
 frame_duration = 1.0/frame_rate
 
-cevent = ClientEventSystem()
+# cevent = ClientEventSystem()
 # view = View(camera_bounds, cevent, map_dimensions)
-host, port = raw_input('input IP address'), 8888
-client = Client(host, port, DumbView(), cevent)
+host, port = '169.234.50.206', 8888
+client = Client(host, port, DumbView(), None)
 
 controller = ClientController(client)
 
