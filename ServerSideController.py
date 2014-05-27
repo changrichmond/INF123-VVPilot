@@ -19,6 +19,11 @@ class ServerSideController:
         self.BULLET_DURATION = BULLET_DURATION
         self.SHOOT_DELAY = SHOOT_DELAY
         self.SHIELD_SIZE = SHIELD_SIZE
+        self.isMoving = False
+        self.isShooting = False
+        self.isLefting = False
+        self.isRighting = False
+        self.isShielding = False
         
     def move_ship(self):
         if not self.player_ship.isDead():
@@ -48,3 +53,18 @@ class ServerSideController:
     def shield_off(self):
         if not self.player_ship.isDead() and self.player_ship.can_toggle_shield(True):
             self.player_ship.shield_obj = None
+            
+    def update(self, logic):
+        if self.isMoving:
+            self.move_ship()
+        if self.isLefting:
+            self.turn_left()
+        if self.isRighting:
+            self.turn_right()
+        if self.isShooting:
+            self.shoot()
+        if self.isShielding:
+            self.shield_on()
+            
+            
+    

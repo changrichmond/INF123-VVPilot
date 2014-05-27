@@ -122,7 +122,7 @@ class Logic:
                 self.bullet_list.remove(self.bullet_list[i])
         self.onLogicUpdate.fire(self)
         
-        #scheduled for removal
-        for ship in self.ship_list:
-            ship.moved = False
-            ship.shield_obj = None
+#         #scheduled for removal
+#         for ship in self.ship_list:
+#             ship.moved = False
+#             ship.shield_obj = None

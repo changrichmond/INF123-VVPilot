@@ -23,19 +23,34 @@ class ClientController():
     def __init__(self, handler):
         self.handler = handler
     def move_ship(self):
-        self.handler.do_send({'control':'move'})
+        self.handler.do_send({'control':'move_on'})
     
     def turn_left(self):
-        self.handler.do_send({'control':'left'})
+        self.handler.do_send({'control':'left_on'})
     
     def turn_right(self):
-        self.handler.do_send({'control':'right'})
+        self.handler.do_send({'control':'right_on'})
     
     def shoot(self):
-        self.handler.do_send({'control':'shoot'})
+        self.handler.do_send({'control':'shoot_on'})
         
-    def shield_on(self):
+    def shield(self):
         self.handler.do_send({'control':'shield_on'})
+    
+    def stop_move_ship(self):
+        self.handler.do_send({'control':'move_off'})
+        
+    def stop_turn_left(self):
+        self.handler.do_send({'control':'left_off'})
+    
+    def stop_turn_right(self):
+        self.handler.do_send({'control':'right_off'})
+    
+    def stop_shoot(self):
+        self.handler.do_send({'control':'shoot_off'})
+        
+    def stop_shield(self):
+        self.handler.do_send({'control':'shield_off'})
         
 running = 1
 
@@ -76,6 +91,33 @@ client = Client(host, port, view, cevent)
 
 controller = ClientController(client)
 
+def read_inputs(onMove, onTurnLeft, onTurnRight, onShoot, onShield, offMove, offTurnLeft, offTurnRight, offShoot, offShield):
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            exit()
+        elif event.type == KEYDOWN:
+            if event.key == K_w or event.key == K_UP:
+                onMove()
+            elif event.key == K_a or event.key == K_LEFT:
+                onTurnLeft()
+            elif event.key == K_d or event.key == K_RIGHT:
+                onTurnRight()
+            elif event.key == K_SPACE:
+                onShoot()
+            elif event.key == K_s or event.key == K_DOWN:
+                onShield()
+        elif event.type == KEYUP:
+            if event.key == K_w or event.key == K_UP:
+                offMove()
+            elif event.key == K_a or event.key == K_LEFT:
+                offTurnLeft()
+            elif event.key == K_d or event.key == K_RIGHT:
+                offTurnRight()
+            elif event.key == K_SPACE:
+                offShoot()
+            elif event.key == K_s or event.key == K_DOWN:
+                offShield()
+
 
 def read_input(onMove, onTurnLeft, onTurnRight, onShoot, onShield):
     keys = pygame.key.get_pressed()
@@ -104,11 +146,12 @@ def read_input(onMove, onTurnLeft, onTurnRight, onShoot, onShield):
 # thread.start()
 while running:
     start_time = time.time()
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            exit()
+#     for event in pygame.event.get():
+#         if event.type == QUIT:
+#             exit()
 #     player_ship.moved = False
-    read_input(controller.move_ship, controller.turn_left, controller.turn_right, controller.shoot, controller.shield_on)
+    read_inputs(controller.move_ship, controller.turn_left, controller.turn_right, controller.shoot, controller.shield, 
+                controller.stop_move_ship, controller.stop_turn_left, controller.stop_turn_right, controller.stop_shoot, controller.stop_shield)
     
     view.draw_everything()
     while time.time() - start_time < frame_duration:

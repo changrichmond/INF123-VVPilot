@@ -60,6 +60,7 @@ class MyHandler(Handler):
         player_ship = Ship((320, 240), (15, 15), SHOOT_DELAY, SPEED, VELOCITY_CAP, ANGULAR_VELOCITY, random_respawn(min_respawn, max_respawn))
         logic.ship_list.append(player_ship)
         self.controller = ServerSideController(player_ship, logic, BULLET_SIZE, BULLET_SPEED, BULLET_DURATION, SHOOT_DELAY, SHIELD_SIZE)
+        logic.onLogicUpdate+=self.controller.update
         self.do_send({'start': [Serialize.serializeRect(wall) for wall in logic.wall_list]})
         logic.onLogicUpdate+=self.onLogicUpdate
         handlers.append(self)
@@ -77,17 +78,42 @@ class MyHandler(Handler):
         logic.ship_list.remove(self.controller.player_ship)
      
     def on_msg(self, msg):
+        print 'message received'
         if 'control' in msg:
-            if msg['control'] == 'move':
-                self.controller.move_ship()
-            elif msg['control'] == 'left':
-                self.controller.turn_left()
-            elif msg['control'] == 'right':
-                self.controller.turn_right()
-            elif msg['control'] == 'shoot':
-                self.controller.shoot()
+            if msg['control'] == 'move_on':
+                self.controller.isMoving = True
+                self.controller.player_ship.moved = True
+            elif msg['control'] == 'left_on':
+                self.controller.isLefting = True
+            elif msg['control'] == 'right_on':
+                self.controller.isRighting = True
+            elif msg['control'] == 'shoot_on':
+                self.controller.isShooting = True
             elif msg['control'] == 'shield_on':
-                self.controller.shield_on()
+                self.controller.isShielding = True
+            elif msg['control'] == 'move_off':
+                self.controller.isMoving = False
+                self.controller.player_ship.moved = False
+            elif msg['control'] == 'left_off':
+                self.controller.isLefting = False
+            elif msg['control'] == 'right_off':
+                self.controller.isRighting = False
+            elif msg['control'] == 'shoot_off':
+                self.controller.isShooting = False
+            elif msg['control'] == 'shield_off':
+                self.controller.isShielding = False
+                self.controller.player_ship.shield_obj = None
+#         if 'control' in msg:
+#             if msg['control'] == 'move':
+#                 self.controller.move_ship()
+#             elif msg['control'] == 'left':
+#                 self.controller.turn_left()
+#             elif msg['control'] == 'right':
+#                 self.controller.turn_right()
+#             elif msg['control'] == 'shoot':
+#                 self.controller.shoot()
+#             elif msg['control'] == 'shield_on':
+#                 self.controller.shield_on()
 
 
 
