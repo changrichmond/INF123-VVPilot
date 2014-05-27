@@ -78,7 +78,6 @@ class MyHandler(Handler):
         logic.ship_list.remove(self.controller.player_ship)
      
     def on_msg(self, msg):
-        print 'message received'
         if 'control' in msg:
             if msg['control'] == 'move_on':
                 self.controller.isMoving = True
