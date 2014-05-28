@@ -19,11 +19,12 @@ class ServerSideController:
         self.BULLET_DURATION = BULLET_DURATION
         self.SHOOT_DELAY = SHOOT_DELAY
         self.SHIELD_SIZE = SHIELD_SIZE
-        self.isMoving = False
-        self.isShooting = False
-        self.isLefting = False
-        self.isRighting = False
-        self.isShielding = False
+        self.isMoving = self.wasMoving = False
+        self.isShooting = self.wasShooting = False
+        self.isLefting = self.wasLefting = False
+        self.isRighting = self.wasRighting = False
+        self.isShielding = self.wasShielding = False
+        self.log = [('ship', player_ship, logic.current_tick)]
         
     def move_ship(self):
         if not self.player_ship.isDead():
@@ -46,6 +47,7 @@ class ServerSideController:
             self.logic.bullet_list.append(bullet)
             self.player_ship.delay = self.SHOOT_DELAY
             self.player_ship.move_from_force_in_direction(self.player_ship.acceleration, self.player_ship.direction+180)
+            self.log.append(('bullet', bullet, self.logic.current_tick))
             
     def shield_on(self):
         if not self.player_ship.isDead() and self.player_ship.can_toggle_shield(True):
@@ -65,6 +67,13 @@ class ServerSideController:
             self.shoot()
         if self.isShielding:
             self.shield_on()
+        if self.isMoving is not self.wasMoving or self.isShooting is not self.wasShooting or self.isLefting is not self.wasLefting or self.isRighting is not self.wasRighting or self.isShielding is not self.wasShielding:
+            self.log.append(('ship', self.player_ship, logic.current_tick))
+            self.wasMoving = self.isMoving
+            self.wasShooting = self.isShooting
+            self.wasLefting = self.isLefting
+            self.wasRighting = self.isRighting
+            self.wasShielding = self.isShielding
             
-            
-    
+    def onShipRespawn(self, ship):
+        self.log.append(('ship', ship, self.logic.current_tick))

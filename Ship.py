@@ -5,6 +5,7 @@ Created on Apr 17, 2014
 '''
 
 import pygame, math
+from Events import Broadcaster
 
 def default_respawn(ship):
     ship.location = (0, 0)
@@ -13,6 +14,7 @@ def default_respawn(ship):
     ship.direction = 0
 
 class Ship:
+    CUR_ID = 0
     def __init__(self, location, bounds, shoot_delay, acceleration, max_speed, turn_rate, respawn_func = default_respawn, direction = 0, velocity = (0.0, 0.0), shield_duration = 120):
         self.location = location
         self.bounds = bounds
@@ -26,9 +28,12 @@ class Ship:
         self.turn_rate = turn_rate
         self.death_timer = 0
         self.respawn_func = respawn_func
+        self.respawn_event = Broadcaster()
         self.moved = False
         self.shield_duration = self.shield = shield_duration*2
         self.shield_obj = None
+        self.id = Ship.CUR_ID
+        Ship.CUR_ID+=1
     def update(self):
         self.location = (self.location[0] + self.velocity[0], self.location[1] + self.velocity[1])
         self.rect.center = self.location
@@ -44,6 +49,7 @@ class Ship:
             self.death_timer -= 1
             if not self.isDead():
                 self.respawn_func(self)
+                self.respawn_event.fire(self)
         
     def turn(self, turn_speed):
         self.direction += turn_speed

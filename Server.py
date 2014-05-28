@@ -20,6 +20,8 @@ def random_respawn(minLoc, maxLoc):
 
 min_respawn = (320, 240)
 max_respawn = (3000, 1600)
+
+TICKS = 60
     
 SPEED = 0.075
 BULLET_SPEED = 10
@@ -44,10 +46,10 @@ class EventLog:
         self.ship_deaths = []
         
     def ship_log(self, ship):
-        self.ship_deaths.append(ship)
+        self.ship_deaths.append((ship, logic.current_tick))
         
     def bullet_log(self, bullet, wall):
-        self.bullet_deaths.append((bullet,wall))
+        self.bullet_deaths.append((bullet,wall, logic.current_tick))
 
 event_log = EventLog()
 logic.onShipDeath+=event_log.ship_log
@@ -61,18 +63,26 @@ class MyHandler(Handler):
         logic.ship_list.append(player_ship)
         self.controller = ServerSideController(player_ship, logic, BULLET_SIZE, BULLET_SPEED, BULLET_DURATION, SHOOT_DELAY, SHIELD_SIZE)
         logic.onLogicUpdate+=self.controller.update
-        self.do_send({'start': [Serialize.serializeRect(wall) for wall in logic.wall_list]})
-        logic.onLogicUpdate+=self.onLogicUpdate
+        self.do_send({'start': { 'walls': [Serialize.serializeRect(wall) for wall in logic.wall_list],
+                                'ticks': TICKS, 
+                                'speed' : SPEED,
+                                'bspeed' : BULLET_SPEED,
+                                'maxvelo' : VELOCITY_CAP,
+                                'angular' : ANGULAR_VELOCITY,
+                                'current' : logic.current_tick,
+                                'id' : player_ship.id}})
+        #logic.onLogicUpdate+=self.onLogicUpdate
         handlers.append(self)
      
-    def onLogicUpdate(self, logic):
-        msg = {'update':
-               {'ships': [Serialize.serializeShip(ship) for ship in logic.ship_list], 
-                'bullets': [Serialize.serializeBullet(bullet) for bullet in logic.bullet_list], 
-                'location': self.controller.player_ship.location,
-                 'ship_deaths': [Serialize.serializeShip(ship) for ship in event_log.ship_deaths], 
-                 'bullet_deaths': [(Serialize.serializeBullet(bullet[0]), Serialize.serializeRect(bullet[1])) for bullet in event_log.bullet_deaths ]} }
-        self.do_send(msg)
+#     def onLogicUpdate(self, logic):
+#         pass
+# #         msg = {'update':
+# #                {'ships': [Serialize.serializeShip(ship) for ship in logic.ship_list], 
+# #                 'bullets': [Serialize.serializeBullet(bullet) for bullet in logic.bullet_list], 
+# #                 'location': self.controller.player_ship.location,
+# #                  'ship_deaths': [Serialize.serializeShip(ship) for ship in event_log.ship_deaths], 
+# #                  'bullet_deaths': [(Serialize.serializeBullet(bullet[0]), Serialize.serializeRect(bullet[1])) for bullet in event_log.bullet_deaths ]} }
+# #         self.do_send(msg)
               
     def on_close(self):
         logic.ship_list.remove(self.controller.player_ship)
@@ -114,7 +124,48 @@ class MyHandler(Handler):
 #             elif msg['control'] == 'shield_on':
 #                 self.controller.shield_on()
 
-
+def poll_events():
+    event_list = []
+    for h in handlers:
+        event_list.extend(h.controller.log)
+        h.controller.log = []
+    ship_output = {}
+    bullet_output = {}
+    for e in event_list:
+        if e[0] == 'ship':
+            if not ship_output.has_key('normal'):
+                ship_output['normal'] = []
+            ship_output['normal'].append((Serialize.serializeShip(e[1]), e[2]))
+        elif e[0] == 'bullet':
+            if not bullet_output.has_key('normal'):
+                bullet_output['normal'] = []
+            bullet_output['normal'].append((Serialize.serializeBullet(e[1]), e[2]))
+            
+    for e in event_log.ship_deaths:
+        if not ship_output.has_key('death'):
+            ship_output['death'] = []
+        ship_output['death'].append((Serialize.serializeShip(e[0]), e[1]))
+    event_log.ship_log = []
+        
+    for e in event_log.bullet_deaths:
+        if not bullet_output.has_key('death'):
+            bullet_output['death'] = []
+        bullet_output['death'].append((Serialize.serializeBullet(e[0]), Serialize.serializeRect(e[1]), e[2]))
+    event_log.bullet_log = []
+        
+    full_output = {}
+    if len(ship_output)>0:
+        full_output['ship'] = ship_output
+    if len(bullet_output)>0:
+        full_output['bullet'] = bullet_output
+    if len(full_output)>0:
+        msg = { 'update' : full_output }
+        for h in handlers:
+            h.do_send(msg)
+    
+            
+    
+        
 
 for i in range(0, num_walls):
     x = random.randint(400, 3200)
@@ -132,8 +183,9 @@ port = 8888
 server = Listener(port, MyHandler)
 clock = pygame.time.Clock()
 while 1:
-    clock.tick(60)
+    clock.tick(TICKS)
     logic.doLogic()
-    event_log.bullet_deaths = []
-    event_log.ship_deaths = []
+    poll_events()
+#     event_log.bullet_deaths = []
+#     event_log.ship_deaths = []
     poll(timeout=0.0125) # in seconds

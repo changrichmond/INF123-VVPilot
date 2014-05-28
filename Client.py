@@ -4,13 +4,11 @@ Created on Apr 30, 2014
 @author: john
 '''
 
-import pygame, random, Serialize, time
-from threading import Thread
+import pygame, Serialize, time
 from pygame.locals import *
 from network import *
 
 from View import View
-from Ship import Ship
 
 from Events import Broadcaster
 
@@ -54,11 +52,29 @@ class ClientController():
         
 running = 1
 
+TICKS = 60
+
+SERVER_TICKS = TICKS
+    
+SPEED = 0
+BULLET_SPEED = 0
+ANGULAR_VELOCITY = 0
+VELOCITY_CAP = 0
+
+server_current = 0
+
+def interpolate_ship(ship, delta):
+    print 'fix me later'
+
+ship_dict = {}
+bullet_dict = {}
+
 class Client(Handler):
     def __init__(self, host, port, view, client_controller):
         Handler.__init__(self, host, port)
         self.view = view
         self.controller = client_controller
+        self.ship_id = 0
     
     def on_close(self):
         global running
@@ -66,16 +82,63 @@ class Client(Handler):
     
     def on_msg(self, msg):
         if 'start' in msg:
-            for wall in msg['start']:
+            SERVER_TICKS = msg['start']['ticks']
+            SPEED = msg['start']['speed']
+            BULLET_SPEED = msg['start']['bspeed']
+            VELOCITY_CAP = msg['start']['maxvelo']
+            ANGULAR_VELOCITY = msg['start']['angular']
+            server_current = msg['start']['current']
+            self.ship_id = msg['start']['id']
+            for wall in msg['start']['walls']:
                 self.view.wall_list.append(Serialize.deserializeRect(wall))
+            
         elif 'update' in msg:
-            self.view.ship_list = [Serialize.deserializeShip(ship) for ship in msg['update']['ships']]
-            self.view.bullet_list = [Serialize.deserializeBullet(bullet) for bullet in msg['update']['bullets']]
-            self.view.set_camera_loc(msg['update']['location'])
-            for ship_ID in msg['update']['ship_deaths']:
-                self.controller.onShipDeath.fire(Serialize.deserializeShip(ship_ID))
-            for bullet_ID in msg['update']['bullet_deaths']:
-                self.controller.onBulletDeath.fire(Serialize.deserializeBullet(bullet_ID[0]), Serialize.deserializeRect(bullet_ID[1]))                                                                           
+            msginput = msg['update']
+            if 'ship' in msginput:
+                if 'normal' in msginput['ship']:
+                    for n in msginput['ship']['normal']:
+                        ship = Serialize.deserializeShip(n[0])
+                        if ship.id in ship_dict:
+                            found_ship = ship_dict[ship.id]
+                            found_ship.__dict__ = ship.__dict__.copy()
+                        else:
+                            ship_dict[ship.id] = ship
+                            self.view.ship_list.append(ship)
+                if 'death' in msginput['ship']:
+                    for n in msginput['ship']['death']:
+                        ship = Serialize.deserializeShip(n[0])
+                        if ship.id in ship_dict:
+                            found_ship = ship_dict[ship.id]
+                            found_ship.__dict__ = ship.__dict__.copy()
+                        else:
+                            ship_dict[ship.id] = ship
+                            self.view.ship_list.append(ship)
+                        self.controller.onShipDeath.fire(ship)   
+            if 'bullet' in msginput:
+                if 'normal' in msginput['bullet']:
+                    for n in msginput['bullet']['normal']:
+                        bullet = Serialize.deserializeBullet(n[0])
+                        if bullet.id in bullet_dict:
+                            found_bullet = bullet_dict[bullet.id]
+                            found_bullet.__dict__ = bullet.__dict__.copy()
+                        else:
+                            bullet_dict[bullet.id] = bullet
+                            self.view.bullet_list.append(bullet)
+                if 'death' in msginput['bullet']:
+                    for n in msginput['bullet']['death']:
+                        bullet = Serialize.deserializeBullet(n[0])
+                        wall = Serialize.deserializeRect(n[1])
+                        if bullet.id in bullet_dict:
+                            self.view.bullet_list.remove(bullet_dict[bullet.id])
+                            del bullet_dict[bullet.id]
+                        self.controller.onBulletDeath.fire(bullet, wall)  
+#             self.view.ship_list = [Serialize.deserializeShip(ship) for ship in msg['update']['ships']]
+#             self.view.bullet_list = [Serialize.deserializeBullet(bullet) for bullet in msg['update']['bullets']]
+#             self.view.set_camera_loc(msg['update']['location'])
+#             for ship_ID in msg['update']['ship_deaths']:
+#                 self.controller.onShipDeath.fire(Serialize.deserializeShip(ship_ID))
+#             for bullet_ID in msg['update']['bullet_deaths']:
+#                 self.controller.onBulletDeath.fire(Serialize.deserializeBullet(bullet_ID[0]), Serialize.deserializeRect(bullet_ID[1]))                                                                           
 
 map_dimensions = (3200, 1800)
 

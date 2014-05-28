@@ -12,6 +12,7 @@ DEATH_TIME = 120
 
 class Logic:
     def __init__(self):
+        self.current_tick = 0
         #event system
         self.onShipDeath = Broadcaster()
         self.onShipKill = Broadcaster()
@@ -121,6 +122,7 @@ class Logic:
             else:
                 self.bullet_list.remove(self.bullet_list[i])
         self.onLogicUpdate.fire(self)
+        self.current_tick+=1
         
 #         #scheduled for removal
 #         for ship in self.ship_list:

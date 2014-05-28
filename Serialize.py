@@ -18,7 +18,8 @@ def serializeObject(obj):
 def serializeShip(ship):
     return { 'location':ship.location, 'bounds':ship.bounds, 
            'direction':ship.direction, 'death_timer':ship.death_timer,
-           'moved':ship.moved, 'shield_obj':serializeRect(ship.shield_obj)}
+           'moved':ship.moved, 'shield_obj':serializeRect(ship.shield_obj),
+           'velocity': ship.velocity, 'id' : ship.id}
     
 def deserializeShip(ship):
     retship = Ship(ship['location'], ship['bounds'], 0, 0, 0, 0)
@@ -26,14 +27,19 @@ def deserializeShip(ship):
     retship.death_timer = ship['death_timer']
     retship.moved = ship['moved']
     retship.shield_obj = deserializeRect(ship['shield_obj'])
+    retship.velocity = ship['velocity']
+    retship.id = ship['id']
     return retship
     
 def serializeBullet(bullet):
     return {'location':bullet.location, 'bounds':bullet.bounds,
-            'direction':bullet.direction, 'velocity':bullet.velocity}
+            'direction':bullet.direction, 'velocity':bullet.velocity,
+            'id' : bullet.id}
     
 def deserializeBullet(bullet):
-    return Bullet(bullet['location'], bullet['bounds'], bullet['direction'], bullet['velocity'])
+    retbullet = Bullet(bullet['location'], bullet['bounds'], bullet['direction'], bullet['velocity'])
+    retbullet.id = bullet['id']
+    return retbullet
 
 def serializeRect(rect):
     if not rect:
