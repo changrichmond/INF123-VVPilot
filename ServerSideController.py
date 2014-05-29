@@ -13,6 +13,7 @@ class ServerSideController:
     
     def __init__(self, player_ship, logic, BULLET_SIZE, BULLET_SPEED, BULLET_DURATION, SHOOT_DELAY, SHIELD_SIZE):
         self.player_ship = player_ship
+        self.player_ship.respawn_event+=self.onShipRespawn
         self.logic = logic
         self.BULLET_SIZE = BULLET_SIZE
         self.BULLET_SPEED = BULLET_SPEED
@@ -24,7 +25,7 @@ class ServerSideController:
         self.isLefting = self.wasLefting = False
         self.isRighting = self.wasRighting = False
         self.isShielding = self.wasShielding = False
-        self.log = [('ship', player_ship, logic.current_tick)]
+        self.log = [('ship', player_ship, logic.current_tick, self.isMoving, self.isLefting, self.isRighting)]
         
     def move_ship(self):
         if not self.player_ship.isDead():
@@ -48,6 +49,7 @@ class ServerSideController:
             self.player_ship.delay = self.SHOOT_DELAY
             self.player_ship.move_from_force_in_direction(self.player_ship.acceleration, self.player_ship.direction+180)
             self.log.append(('bullet', bullet, self.logic.current_tick))
+            self.log.append(('ship', self.player_ship, self.logic.current_tick, self.isMoving, self.isLefting, self.isRighting))
             
     def shield_on(self):
         if not self.player_ship.isDead() and self.player_ship.can_toggle_shield(True):
@@ -68,7 +70,7 @@ class ServerSideController:
         if self.isShielding:
             self.shield_on()
         if self.isMoving is not self.wasMoving or self.isShooting is not self.wasShooting or self.isLefting is not self.wasLefting or self.isRighting is not self.wasRighting or self.isShielding is not self.wasShielding:
-            self.log.append(('ship', self.player_ship, logic.current_tick))
+            self.log.append(('ship', self.player_ship, logic.current_tick, self.isMoving, self.isLefting, self.isRighting))
             self.wasMoving = self.isMoving
             self.wasShooting = self.isShooting
             self.wasLefting = self.isLefting
@@ -76,4 +78,4 @@ class ServerSideController:
             self.wasShielding = self.isShielding
             
     def onShipRespawn(self, ship):
-        self.log.append(('ship', ship, self.logic.current_tick))
+        self.log.append(('ship', ship, self.logic.current_tick, self.isMoving, self.isLefting, self.isRighting))

@@ -135,7 +135,7 @@ def poll_events():
         if e[0] == 'ship':
             if not ship_output.has_key('normal'):
                 ship_output['normal'] = []
-            ship_output['normal'].append((Serialize.serializeShip(e[1]), e[2]))
+            ship_output['normal'].append((Serialize.serializeShip(e[1]), e[2], e[3], e[4], e[5]))
         elif e[0] == 'bullet':
             if not bullet_output.has_key('normal'):
                 bullet_output['normal'] = []
@@ -144,14 +144,14 @@ def poll_events():
     for e in event_log.ship_deaths:
         if not ship_output.has_key('death'):
             ship_output['death'] = []
-        ship_output['death'].append((Serialize.serializeShip(e[0]), e[1]))
-    event_log.ship_log = []
+        ship_output['death'].append((Serialize.serializeShip(e[0]), e[1], False, False, False))
+    event_log.ship_deaths = []
         
     for e in event_log.bullet_deaths:
         if not bullet_output.has_key('death'):
             bullet_output['death'] = []
         bullet_output['death'].append((Serialize.serializeBullet(e[0]), Serialize.serializeRect(e[1]), e[2]))
-    event_log.bullet_log = []
+    event_log.bullet_deaths = []
         
     full_output = {}
     if len(ship_output)>0:

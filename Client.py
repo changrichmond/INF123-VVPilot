@@ -4,7 +4,7 @@ Created on Apr 30, 2014
 @author: john
 '''
 
-import pygame, Serialize, time
+import pygame, Serialize, time, math
 from pygame.locals import *
 from network import *
 
@@ -63,10 +63,34 @@ VELOCITY_CAP = 0
 
 server_current = 0
 
-def interpolate_ship(ship, delta):
-    print 'fix me later'
+def interpolate_ship(ship, delta, flags):
+    for n in range(delta):
+        if flags[1]:
+            ship.direction -= ANGULAR_VELOCITY
+        if flags[2]:
+            ship.direction += ANGULAR_VELOCITY
+        ship.location = (ship.location[0] + ship.velocity[0]*delta, ship.location[1] + ship.velocity[1]*delta)
+        if flags[0]:
+            sinD = math.sin(math.radians(ship.direction))
+            cosD = math.cos(math.radians(ship.direction))
+            ship.velocity = (ship.velocity[0] + SPEED*sinD, ship.velocity[1] - SPEED*cosD)
+            mag = math.sqrt(math.pow(ship.velocity[0], 2) + math.pow(ship.velocity[1], 2))
+            if mag>VELOCITY_CAP:
+                ship.velocity = (ship.velocity[0]/mag*VELOCITY_CAP, ship.velocity[1]/mag*VELOCITY_CAP)
+
+def interpolate_bullet(bullet, delta):
+    for n in range(delta):
+        bullet.update()
+#     ship.direction += ANGULAR_VELOCITY*delta
+#     velocity = ship.velocity
+#     if isMoving:
+#         ship.move_from_force(SPEED*delta)
+#     
+#     ship.location = (ship.location[0] + ship.velocity[0]*delta, ship.location[1] + ship.velocity[1]*delta)
+    
 
 ship_dict = {}
+flags_dict = {}
 bullet_dict = {}
 
 class Client(Handler):
@@ -82,6 +106,7 @@ class Client(Handler):
     
     def on_msg(self, msg):
         if 'start' in msg:
+            global SERVER_TICKS, SPEED, BULLET_SPEED, VELOCITY_CAP, ANGULAR_VELOCITY
             SERVER_TICKS = msg['start']['ticks']
             SPEED = msg['start']['speed']
             BULLET_SPEED = msg['start']['bspeed']
@@ -98,22 +123,31 @@ class Client(Handler):
                 if 'normal' in msginput['ship']:
                     for n in msginput['ship']['normal']:
                         ship = Serialize.deserializeShip(n[0])
+                        isMoving = n[2]
+                        isLefting = n[3]
+                        isRighting = n[4]
                         if ship.id in ship_dict:
                             found_ship = ship_dict[ship.id]
                             found_ship.__dict__ = ship.__dict__.copy()
                         else:
                             ship_dict[ship.id] = ship
                             self.view.ship_list.append(ship)
+                            
+                        flags_dict[ship.id] = (isMoving, isLefting, isRighting)
                 if 'death' in msginput['ship']:
                     for n in msginput['ship']['death']:
                         ship = Serialize.deserializeShip(n[0])
+                        isMoving = n[2]
+                        isLefting = n[3]
+                        isRighting = n[4]
                         if ship.id in ship_dict:
                             found_ship = ship_dict[ship.id]
                             found_ship.__dict__ = ship.__dict__.copy()
                         else:
                             ship_dict[ship.id] = ship
                             self.view.ship_list.append(ship)
-                        self.controller.onShipDeath.fire(ship)   
+                        flags_dict[ship.id] = (isMoving, isLefting, isRighting)
+                        self.controller.onShipDeath.fire(ship)
             if 'bullet' in msginput:
                 if 'normal' in msginput['bullet']:
                     for n in msginput['bullet']['normal']:
@@ -216,6 +250,12 @@ while running:
     read_inputs(controller.move_ship, controller.turn_left, controller.turn_right, controller.shoot, controller.shield, 
                 controller.stop_move_ship, controller.stop_turn_left, controller.stop_turn_right, controller.stop_shoot, controller.stop_shield)
     
+    for n in view.ship_list:
+        interpolate_ship(n, 1, flags_dict[n.id])
+    for n in view.bullet_list:
+        interpolate_bullet(n, 1)
+    if client.ship_id in ship_dict:
+        view.set_camera_loc(ship_dict[client.ship_id].location)
     view.draw_everything()
     while time.time() - start_time < frame_duration:
         poll(frame_duration - (time.time() - start_time))

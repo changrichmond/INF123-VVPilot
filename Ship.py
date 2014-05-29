@@ -15,7 +15,7 @@ def default_respawn(ship):
 
 class Ship:
     CUR_ID = 0
-    def __init__(self, location, bounds, shoot_delay, acceleration, max_speed, turn_rate, respawn_func = default_respawn, direction = 0, velocity = (0.0, 0.0), shield_duration = 120):
+    def __init__(self, location, bounds, shoot_delay, acceleration, max_speed, turn_rate, respawn_func = default_respawn, direction = 0, velocity = (0.0, 0.0), shield_duration = 120, curr_acceleration = (0.0, 0.0)):
         self.location = location
         self.bounds = bounds
         self.shoot_delay = shoot_delay
@@ -32,9 +32,11 @@ class Ship:
         self.moved = False
         self.shield_duration = self.shield = shield_duration*2
         self.shield_obj = None
+        self.curr_acceleration = curr_acceleration
         self.id = Ship.CUR_ID
         Ship.CUR_ID+=1
     def update(self):
+        #self.velocity = (self.velocity[0] + self.curr_acceleration[0], self.velocity[1] + self.curr_acceleration[1])
         self.location = (self.location[0] + self.velocity[0], self.location[1] + self.velocity[1])
         self.rect.center = self.location
         if self.delay>0:
@@ -73,6 +75,14 @@ class Ship:
         mag = math.sqrt(math.pow(self.velocity[0], 2) + math.pow(self.velocity[1], 2))
         if mag>self.max_speed:
             self.velocity = (self.velocity[0]/mag*self.max_speed, self.velocity[1]/mag*self.max_speed)
+            
+    def accelerate(self):
+        sinD = math.sin(math.radians(self.direction))
+        cosD = math.cos(math.radians(self.direction))
+        self.curr_acceleration = (self.acceleration*sinD, self.acceleration*cosD)
+        
+    def reset_acceleration(self):
+        self.curr_acceleration = (0.0, 0.0)
             
     def kill(self, death_time):
         self.death_timer = death_time
