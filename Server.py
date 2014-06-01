@@ -44,16 +44,21 @@ class EventLog:
     def __init__(self):
         self.bullet_deaths = []
         self.ship_deaths = []
+        self.bullet_timeouts = []
         
     def ship_log(self, ship):
         self.ship_deaths.append((ship, logic.current_tick))
         
     def bullet_log(self, bullet, wall):
         self.bullet_deaths.append((bullet,wall, logic.current_tick))
+    
+    def bullet_timeout(self, bullet):
+        self.bullet_timeouts.append((bullet, logic.current_tick))
 
 event_log = EventLog()
 logic.onShipDeath+=event_log.ship_log
 logic.onBulletDeath+=event_log.bullet_log
+logic.onBulletTimeout+=event_log.bullet_timeout
 
 class MyHandler(Handler):
     
@@ -152,6 +157,12 @@ def poll_events():
             bullet_output['death'] = []
         bullet_output['death'].append((Serialize.serializeBullet(e[0]), Serialize.serializeRect(e[1]), e[2]))
     event_log.bullet_deaths = []
+    
+    for e in event_log.bullet_timeouts:
+        if not bullet_output.has_key('timeout'):
+            bullet_output['timeout'] = []
+        bullet_output['timeout'].append((Serialize.serializeBullet(e[0]), e[1]))
+    event_log.bullet_timeouts = []
         
     full_output = {}
     if len(ship_output)>0:

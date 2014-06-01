@@ -77,6 +77,8 @@ def interpolate_ship(ship, delta, flags):
             mag = math.sqrt(math.pow(ship.velocity[0], 2) + math.pow(ship.velocity[1], 2))
             if mag>VELOCITY_CAP:
                 ship.velocity = (ship.velocity[0]/mag*VELOCITY_CAP, ship.velocity[1]/mag*VELOCITY_CAP)
+        if ship.shield_obj:
+            ship.shield_obj.center = ship.location
 
 def interpolate_bullet(bullet, delta):
     for n in range(delta):
@@ -162,10 +164,13 @@ class Client(Handler):
                     for n in msginput['bullet']['death']:
                         bullet = Serialize.deserializeBullet(n[0])
                         wall = Serialize.deserializeRect(n[1])
+                        self.controller.onBulletDeath.fire(bullet, wall)  
+                if 'timeout' in msginput['bullet']:
+                    for n in msginput['bullet']['timeout']:
+                        bullet = Serialize.deserializeBullet(n[0])
                         if bullet.id in bullet_dict:
                             self.view.bullet_list.remove(bullet_dict[bullet.id])
                             del bullet_dict[bullet.id]
-                        self.controller.onBulletDeath.fire(bullet, wall)  
 #             self.view.ship_list = [Serialize.deserializeShip(ship) for ship in msg['update']['ships']]
 #             self.view.bullet_list = [Serialize.deserializeBullet(bullet) for bullet in msg['update']['bullets']]
 #             self.view.set_camera_loc(msg['update']['location'])

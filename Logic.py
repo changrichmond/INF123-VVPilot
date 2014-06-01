@@ -17,6 +17,7 @@ class Logic:
         self.onShipDeath = Broadcaster()
         self.onShipKill = Broadcaster()
         self.onBulletDeath = Broadcaster()
+        self.onBulletTimeout = Broadcaster()
         self.onShipUpdate = Broadcaster()
         self.onBulletUpdate = Broadcaster()
         self.onLogicUpdate = Broadcaster()
@@ -120,6 +121,7 @@ class Logic:
             if bullet.duration>0:
                 i = i+1
             else:
+                self.onBulletTimeout.fire(self.bullet_list[i])
                 self.bullet_list.remove(self.bullet_list[i])
         self.onLogicUpdate.fire(self)
         self.current_tick+=1
