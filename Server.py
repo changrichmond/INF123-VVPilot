@@ -45,6 +45,8 @@ class EventLog:
         self.bullet_deaths = []
         self.ship_deaths = []
         self.bullet_timeouts = []
+        self.wall_reflects = []
+        self.ship_reflects = []
         
     def ship_log(self, ship):
         self.ship_deaths.append((ship, logic.current_tick))
@@ -54,11 +56,19 @@ class EventLog:
     
     def bullet_timeout(self, bullet):
         self.bullet_timeouts.append((bullet, logic.current_tick))
+        
+    def wall_reflect_log(self, ship, wall):
+        self.wall_reflects.append((ship, wall, logic.current_tick))
+    
+    def ship_reflect_log(self, ship1, ship2):
+        self.ship_reflects.append((ship1, ship2, logic.current_tick))
 
 event_log = EventLog()
 logic.onShipDeath+=event_log.ship_log
 logic.onBulletDeath+=event_log.bullet_log
 logic.onBulletTimeout+=event_log.bullet_timeout
+logic.onShipReflectShip+=event_log.ship_reflect_log
+logic.onShipReflectWall+=event_log.wall_reflect_log
 
 class MyHandler(Handler):
     
@@ -151,6 +161,19 @@ def poll_events():
             ship_output['death'] = []
         ship_output['death'].append((Serialize.serializeShip(e[0]), e[1], False, False, False))
     event_log.ship_deaths = []
+    
+    for e in event_log.ship_reflects:
+        if not ship_output.has_key('reflect'):
+            ship_output['reflect'] = []
+        ship_output['reflect'].append((Serialize.serializeShip(e[0]), e[2]))
+        ship_output['reflect'].append((Serialize.serializeShip(e[1]), e[2]))
+    event_log.ship_reflects = []
+        
+    for e in event_log.wall_reflects:
+        if not ship_output.has_key('reflect'):
+            ship_output['reflect'] = []
+        ship_output['reflect'].append((Serialize.serializeShip(e[0]), e[2]))
+    event_log.wall_reflects = []
         
     for e in event_log.bullet_deaths:
         if not bullet_output.has_key('death'):

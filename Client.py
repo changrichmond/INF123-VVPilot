@@ -150,6 +150,15 @@ class Client(Handler):
                             self.view.ship_list.append(ship)
                         flags_dict[ship.id] = (isMoving, isLefting, isRighting)
                         self.controller.onShipDeath.fire(ship)
+                if 'reflect' in msginput['ship']:
+                    for n in msginput['ship']['reflect']:
+                        ship = Serialize.deserializeShip(n[0])
+                        if ship.id in ship_dict:
+                            found_ship = ship_dict[ship.id]
+                            found_ship.__dict__ = ship.__dict__.copy()
+                        else:
+                            ship_dict[ship.id] = ship
+                            self.view.ship_list.append(ship)
             if 'bullet' in msginput:
                 if 'normal' in msginput['bullet']:
                     for n in msginput['bullet']['normal']:

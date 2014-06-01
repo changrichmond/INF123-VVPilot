@@ -21,6 +21,8 @@ class Logic:
         self.onShipUpdate = Broadcaster()
         self.onBulletUpdate = Broadcaster()
         self.onLogicUpdate = Broadcaster()
+        self.onShipReflectWall = Broadcaster()
+        self.onShipReflectShip = Broadcaster()
         
         #required data
         self.bullet_list = []
@@ -74,6 +76,7 @@ class Logic:
                             if ship1.shield_obj.colliderect(ship2.shield_obj):
                                 ship1.velocity = self.calculate_reflection(ship2.shield_obj, ship1.location, ship1.velocity)
                                 ship2.velocity = self.calculate_reflection(ship1.shield_obj, ship2.location, ship2.velocity)
+                                self.onShipReflectShip.fire(ship1, ship2)
     
         for ship in self.ship_list:
             if ship.shield_obj:
@@ -92,8 +95,10 @@ class Logic:
                                 ship.location = (ship.location[0] + velo[0], ship.location[1] + overlap.h + velo[1])
                             else:
                                 ship.location = (ship.location[0] + velo[0], ship.location[1] - overlap.h + velo[1])
+                        self.onShipReflectWall.fire(ship, n)
                 for n in self.bullet_list:
                     if ship.shield_obj.colliderect(n) and not ship.isDead() and ship is not n.ship:
+                        self.onBulletDeath.fire(n, ship.shield_obj)
                         n.duration = 0
             else:
                 for n in self.wall_list:
