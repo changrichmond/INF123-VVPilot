@@ -66,20 +66,21 @@ current = 0
 
 def interpolate_ship(ship, delta, flags):
     for n in range(delta):
-        if flags[1]:
-            ship.direction -= ANGULAR_VELOCITY
-        if flags[2]:
-            ship.direction += ANGULAR_VELOCITY
-        ship.location = (ship.location[0] + ship.velocity[0]*delta, ship.location[1] + ship.velocity[1]*delta)
-        if flags[0]:
-            sinD = math.sin(math.radians(ship.direction))
-            cosD = math.cos(math.radians(ship.direction))
-            ship.velocity = (ship.velocity[0] + SPEED*sinD, ship.velocity[1] - SPEED*cosD)
-            mag = math.sqrt(math.pow(ship.velocity[0], 2) + math.pow(ship.velocity[1], 2))
-            if mag>VELOCITY_CAP:
-                ship.velocity = (ship.velocity[0]/mag*VELOCITY_CAP, ship.velocity[1]/mag*VELOCITY_CAP)
-        if ship.shield_obj:
-            ship.shield_obj.center = ship.location
+        if not ship.isDead():
+            if flags[1]:
+                ship.direction -= ANGULAR_VELOCITY
+            if flags[2]:
+                ship.direction += ANGULAR_VELOCITY
+            ship.location = (ship.location[0] + ship.velocity[0]*delta, ship.location[1] + ship.velocity[1]*delta)
+            if flags[0]:
+                sinD = math.sin(math.radians(ship.direction))
+                cosD = math.cos(math.radians(ship.direction))
+                ship.velocity = (ship.velocity[0] + SPEED*sinD, ship.velocity[1] - SPEED*cosD)
+                mag = math.sqrt(math.pow(ship.velocity[0], 2) + math.pow(ship.velocity[1], 2))
+                if mag>VELOCITY_CAP:
+                    ship.velocity = (ship.velocity[0]/mag*VELOCITY_CAP, ship.velocity[1]/mag*VELOCITY_CAP)
+            if ship.shield_obj:
+                ship.shield_obj.center = ship.location
 
 def interpolate_bullet(bullet, delta):
     for n in range(delta):
