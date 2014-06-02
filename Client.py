@@ -62,6 +62,7 @@ ANGULAR_VELOCITY = 0
 VELOCITY_CAP = 0
 
 server_current = 0
+current = 0
 
 def interpolate_ship(ship, delta, flags):
     for n in range(delta):
@@ -108,13 +109,13 @@ class Client(Handler):
     
     def on_msg(self, msg):
         if 'start' in msg:
-            global SERVER_TICKS, SPEED, BULLET_SPEED, VELOCITY_CAP, ANGULAR_VELOCITY
+            global SERVER_TICKS, SPEED, BULLET_SPEED, VELOCITY_CAP, ANGULAR_VELOCITY, current
             SERVER_TICKS = msg['start']['ticks']
             SPEED = msg['start']['speed']
             BULLET_SPEED = msg['start']['bspeed']
             VELOCITY_CAP = msg['start']['maxvelo']
             ANGULAR_VELOCITY = msg['start']['angular']
-            server_current = msg['start']['current']
+            server_current = current = msg['start']['current']
             self.ship_id = msg['start']['id']
             for wall in msg['start']['walls']:
                 self.view.wall_list.append(Serialize.deserializeRect(wall))
@@ -195,9 +196,10 @@ camera_bounds = (854, 480)
 frame_rate = 60.0
 frame_duration = 1.0/frame_rate
 
+host, port = raw_input('ip address?'), 8888
+
 cevent = ClientEventSystem()
 view = View(camera_bounds, cevent, map_dimensions)
-host, port = 'localhost', 8888
 client = Client(host, port, view, cevent)
 
 controller = ClientController(client)
@@ -271,5 +273,6 @@ while running:
     if client.ship_id in ship_dict:
         view.set_camera_loc(ship_dict[client.ship_id].location)
     view.draw_everything()
+    current+=1
     while time.time() - start_time < frame_duration:
         poll(frame_duration - (time.time() - start_time))

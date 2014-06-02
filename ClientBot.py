@@ -90,12 +90,12 @@ map_dimensions = (3200, 1800)
 
 camera_bounds = (854, 480)
 
-frame_rate = 60.0
+frame_rate = 5.0
 frame_duration = 1.0/frame_rate
 
 # cevent = ClientEventSystem()
 # view = View(camera_bounds, cevent, map_dimensions)
-host, port = '169.234.50.206', 8888
+host, port = raw_input('ip address?'), 8888
 client = Client(host, port, DumbView(), None)
 
 controller = ClientController(client)
