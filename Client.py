@@ -197,7 +197,7 @@ camera_bounds = (854, 480)
 frame_rate = 60.0
 frame_duration = 1.0/frame_rate
 
-host, port = raw_input('ip address?'), 8888
+host, port = 'cmortty.dnsdynamic.com', 25565
 
 cevent = ClientEventSystem()
 view = View(camera_bounds, cevent, map_dimensions)
